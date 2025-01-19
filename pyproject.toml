@@ -1,0 +1,22 @@
+[project]
+name = "vivaestate-backend"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "olamide",email = "olamoyegunolamidesammy@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "django (>=5.1.5,<6.0.0)",
+    "djangorestframework (>=3.15.2,<4.0.0)",
+    "psycopg2 (>=2.9.10,<3.0.0)",
+    "django-cors-headers (>=4.6.0,<5.0.0)",
+    "djaodjin-saas (>=0.20.5,<0.21.0)",
+    "django-tenants (>=3.7.0,<4.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
