@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth import get_user_model
+from django.conf import settings
 
 class Audit(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -10,13 +10,13 @@ class Audit(models.Model):
         abstract = True
 
 
-class CustomUser(AbstractUser, Audit):
+class User(AbstractUser, Audit):
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
 
 class UserProfile(Audit):
-    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
@@ -33,7 +33,7 @@ class UserRole(Audit):
         ('Customer', 'Customer'),
     )
 
-    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     role = models.CharField(max_length=50, choices=USER_ROLES)
 
     def __str__(self):

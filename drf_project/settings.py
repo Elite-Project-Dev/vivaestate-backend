@@ -27,7 +27,8 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
 
 
 SHARED_APPS = [
@@ -39,8 +40,9 @@ SHARED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
-    "app",
     "accounts",
+    "app",
+   
 ]
 
 TENANT_APPS= ['client_app']
@@ -153,8 +155,17 @@ REST_FRAMEWORK = {
         'rest_framework.pagination.PageNumberPagination',
 }
 
-TENANT_MODEL = "app.client"
+SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
 
-TENANT_DOMAIN_MODEL = "app.domain"
+AUTH_USER_MODEL = 'accounts.User'
 
-PUBLIC_SCHEMA_URLCONF = "app.urls"
+TENANT_MODEL = "app.Client"
+
+TENANT_DOMAIN_MODEL = "app.Domain"
+
+PUBLIC_SCHEMA_URLCONF = "drf_project.urls"
+
+DOMAIN_NAME = config('DOMAIN_NAME')
+TENANT_DOMAINS = {
+    "localhost": "public",  # Associate localhost with the public schema
+}
