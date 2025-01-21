@@ -17,6 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 from decouple import config
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -30,7 +31,6 @@ DEBUG = True
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
-
 SHARED_APPS = [
     "django_tenants",
     "django.contrib.admin",
@@ -39,13 +39,12 @@ SHARED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'rest_framework',
+    "rest_framework",
     "accounts",
     "app",
-   
 ]
 
-TENANT_APPS= ['client_app']
+TENANT_APPS = ["client_app"]
 # Application definition
 
 INSTALLED_APPS = SHARED_APPS + [app for app in TENANT_APPS if app not in SHARED_APPS]
@@ -88,7 +87,7 @@ WSGI_APPLICATION = "drf_project.wsgi.application"
 
 DATABASES = {
     "default": {
-       "ENGINE": "django_tenants.postgresql_backend",
+        "ENGINE": "django_tenants.postgresql_backend",
         "NAME": config("DATABASE_NAME"),
         "USER": config("DATABASE_USER"),
         "PASSWORD": config("DATABASE_PASSWORD"),
@@ -99,6 +98,15 @@ DATABASES = {
 
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
+
+# EMAIL
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_PORT = config("EMAIL_PORT")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS")
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -142,22 +150,21 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SAAS = {
-    'PROCESSOR': {
-        'BACKEND': 'saas.backends.flutterwave_processor.FlutterwaveBackend',
-        'PRIV_KEY': "...",
-        'PUB_KEY': "...",
+    "PROCESSOR": {
+        "BACKEND": "saas.backends.flutterwave_processor.FlutterwaveBackend",
+        "PRIV_KEY": "...",
+        "PUB_KEY": "...",
     }
 }
 
 REST_FRAMEWORK = {
-    'PAGE_SIZE': 25,
-    'DEFAULT_PAGINATION_CLASS':
-        'rest_framework.pagination.PageNumberPagination',
+    "PAGE_SIZE": 25,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
 }
 
 SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
 
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = "accounts.User"
 
 TENANT_MODEL = "app.Client"
 
@@ -165,7 +172,7 @@ TENANT_DOMAIN_MODEL = "app.Domain"
 
 PUBLIC_SCHEMA_URLCONF = "drf_project.urls"
 
-DOMAIN_NAME = config('DOMAIN_NAME')
+DOMAIN_NAME = config("DOMAIN_NAME")
 TENANT_DOMAINS = {
     "localhost": "public",  # Associate localhost with the public schema
 }
