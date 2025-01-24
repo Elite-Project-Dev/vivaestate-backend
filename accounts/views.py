@@ -15,6 +15,7 @@ from django_tenants.utils import schema_context
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import User
 from accounts.serializers import (
@@ -25,6 +26,7 @@ from accounts.serializers import (
     ResetPasswordSerializer,
     SetNewPasswordSerializer,
     SignupSerializer,
+    LoginSerializer,
 )
 from app.models import AgentProfile, Client, Domain
 from services import (
@@ -501,3 +503,30 @@ class ValidateOTPAndResetPassword(CustomResponseMixin, generics.GenericAPIView):
         return self.custom_response(
             message="Password has been reset successfully.",
         )
+
+
+class LoginView(CustomResponseMixin, APIView):
+    permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data
+            refresh = RefreshToken.for_user(user)
+
+            return self.custom_response(
+                status=status.HTTP_200_OK,
+                message="Login successful",
+                data={
+                    "accessToken": str(refresh.access_token),
+                    "refreshToken": str(refresh),
+                },
+            )
+
+        return self.custom_response(
+            status=status.HTTP_400_BAD_REQUEST,
+            message="Invalid data provided",
+            data=serializer.errors,
+        )
+
