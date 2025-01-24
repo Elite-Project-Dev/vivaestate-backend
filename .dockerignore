@@ -4,4 +4,4 @@ __pycache__
 *.pyo
 .git
 .env
-.docker-compose.yml file
+.docker-compose.yml
