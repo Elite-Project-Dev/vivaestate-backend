@@ -5,3 +5,4 @@ __pycache__
 .git
 .env
 .docker-compose.yml
+docker-compose.yml
