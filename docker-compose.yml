@@ -16,7 +16,7 @@ services:
     image: postgres:13
     environment:
       POSTGRES_USER: postgres  # Set the PostgreSQL username
-      POSTGRES_PASSWORD: Segun@10  # Set the PostgreSQL password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Set the PostgreSQL password
       POSTGRES_DB: vivaestate
 volumes:
   postgres_data:  # Define a named volume for PostgreSQL data
