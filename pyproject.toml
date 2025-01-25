@@ -14,7 +14,9 @@ dependencies = [
     "django-cors-headers (>=4.6.0,<5.0.0)",
     "djaodjin-saas (>=0.20.5,<0.21.0)",
     "django-tenants (>=3.7.0,<4.0.0)",
-    "pillow (>=11.1.0,<12.0.0)"
+    "pillow (>=11.1.0,<12.0.0)",
+    "drf-nested-routers (>=0.94.1,<0.95.0)",
+    "djangorestframework-simplejwt (>=5.4.0,<6.0.0)"
 ]
 
 

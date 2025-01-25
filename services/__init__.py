@@ -2,7 +2,6 @@ from services.email import send_password_reset_email, send_signup_verification_e
 from services.main import CustomResponseMixin
 from services.choices import DOCUMENT_TYPE_CHOICES, PROPERTY_STATUS_CHOICES
 
-
 __all__ = (
     "send_signup_verification_email",
     "CustomResponseMixin",

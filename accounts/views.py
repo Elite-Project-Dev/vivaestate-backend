@@ -212,6 +212,7 @@ class VerifyCodeView(CustomResponseMixin, APIView):
             paid_until = date.today() + timedelta(days=trial_duration)
             try:
                 client = Client.objects.create(
+                    user=user,
                     name=agency_name,
                     paid_until=paid_until,
                     on_trial=True,
@@ -219,6 +220,7 @@ class VerifyCodeView(CustomResponseMixin, APIView):
                 client.save()
 
                 Domain.objects.create(
+                    user=user,
                     domain=subdomain,
                     tenant=client,
                 )
@@ -289,6 +291,7 @@ class EmailVerifyView(CustomResponseMixin, APIView):
 
                 try:
                     client = Client.objects.create(
+                        user=user,
                         name=agency_name,
                         paid_until=paid_until,
                         on_trial=True,
@@ -296,6 +299,7 @@ class EmailVerifyView(CustomResponseMixin, APIView):
                     client.save()
 
                     Domain.objects.create(
+                        user=user,
                         domain=subdomain,
                         tenant=client,
                     )

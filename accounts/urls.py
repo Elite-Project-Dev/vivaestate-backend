@@ -7,6 +7,7 @@ from .views import (
     ResendEmailView,
     UserSignupView,
     VerifyCodeView,
+    LoginView,
 )
 
 urlpatterns = [
@@ -24,4 +25,5 @@ urlpatterns = [
         name="password-reset-confirm",
     ),
     path("verify-code/", VerifyCodeView.as_view(), name="verify-signup-code"),
+    path("login/", LoginView.as_view(), name="login")
 ]

@@ -28,7 +28,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".vivaestate.localhost.com"]
 
 
 SHARED_APPS = [
@@ -42,6 +42,7 @@ SHARED_APPS = [
     "rest_framework",
     "accounts",
     "app",
+    "subscription",
 ]
 
 TENANT_APPS = ["client_app"]
@@ -158,6 +159,9 @@ SAAS = {
 }
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
     "PAGE_SIZE": 25,
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
 }
@@ -179,3 +183,14 @@ TENANT_DOMAINS = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=4),  # Access token lifetime (1 hour)
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Refresh token lifetime (7 days)
+    'ROTATE_REFRESH_TOKENS': False,  # Set to True if you want to rotate refresh tokens on every access token refresh
+    'BLACKLIST_AFTER_ROTATION': True,  # Set to True if you want to blacklist refresh tokens after use
+    'ALGORITHM': 'HS256',  # Algorithm used for signing tokens
+    'SIGNING_KEY': 'your-secret-key',  # Secret key for signing the tokens
+}

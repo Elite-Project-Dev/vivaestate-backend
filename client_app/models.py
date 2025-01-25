@@ -31,16 +31,16 @@ class Document(Audit):
         return f"{self.document_type} for {self.property.title}"
 
 class Property(Audit):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='properties')
-    sub_category = models.ForeignKey(Subcategory, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='properties',blank=True, null=True)
+    sub_category = models.ForeignKey(Subcategory, on_delete=models.CASCADE,blank=True, null=True)
     title = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     location = models.CharField(max_length=255)
     property_type = models.CharField(max_length=50)  # E.g., 'Apartment', 'House', etc.
-    bedrooms = models.IntegerField()
-    bathrooms = models.IntegerField()
-    square_feet = models.IntegerField()
+    bedrooms = models.IntegerField(blank=True, null=True)
+    bathrooms = models.IntegerField(blank=True, null=True)
+    square_feet = models.IntegerField(blank=True, null=True)
     status = models.CharField(max_length=50, choices=PROPERTY_STATUS_CHOICES, default='available')
     image = models.ImageField(upload_to='property_images/', blank=True, null=True)
     video = models.FileField(upload_to='property_videos/', blank=True, null=True)
