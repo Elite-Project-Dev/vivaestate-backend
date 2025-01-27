@@ -1,0 +1,42 @@
+from rest_framework import status, views
+from rest_framework.permissions import IsAuthenticated
+from client_app.models import Property
+from .models import Favourite
+from services import CustomResponseMixin
+from django.shortcuts import get_object_or_404
+from .serializers import PropertySerializer
+
+class FavouritePropertyView(views.APIView, CustomResponseMixin):
+    permission_classes = [IsAuthenticated]
+    def get_property(self, property_id):
+        return get_object_or_404(Property, id=property_id)
+    def post(self, request, property_id):
+        user = request.user
+        property = self.get_property(property_id)
+
+        if Favourite.objects.filter(user=user, property=property).exists():
+            return self.custom_response(message="You have already liked this property", status=status.HTTP_400_BAD_REQUEST)
+        Favourite.objects.create(user=user, property=property)
+        return self.custom_response(message="Property liked successfully.", status=status.HTTP_201_CREATED)
+    
+    def delete(self, request, property_id):
+        user = request.user
+        property = self.get_property(property_id)
+        favourite = Favourite.objects.filter(user=user, property=property)
+        if favourite.exists():
+            favourite.delete()  # Deleting the liked property
+            return self.custom_response(
+                message="Like removed successfully", 
+                status=status.HTTP_204_NO_CONTENT
+            )
+        else:
+            return self.custom_response(
+                message="Property was not liked.", 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    def get(self, request):
+        user = request.user
+        favourite_properties = Favourite.objects.filter(user=user)
+        properties = Property.objects.filter(id__in=[f.property.id for f in favourite_properties])
+        serializer = PropertySerializer(properties, many=True)
+        return self.custom_response(data= serializer.data,status=status.HTTP_200_OK, message="Favourite properties fetched successfully" )

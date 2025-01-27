@@ -43,6 +43,7 @@ SHARED_APPS = [
     "accounts",
     "app",
     "subscription",
+    "social",
 ]
 
 TENANT_APPS = ["client_app"]
