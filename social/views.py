@@ -5,11 +5,13 @@ from .models import Favourite
 from services import CustomResponseMixin
 from django.shortcuts import get_object_or_404
 from .serializers import PropertySerializer
+from rest_framework.views import APIView
 
-class FavouritePropertyView(views.APIView, CustomResponseMixin):
+
+class FavouritePropertyView(APIView, CustomResponseMixin):
     permission_classes = [IsAuthenticated]
     def get_property(self, property_id):
-        return get_object_or_404(Property, id=property_id)
+        return get_object_or_404(Property.objects.select_related(), id=property_id)
     def post(self, request, property_id):
         user = request.user
         property = self.get_property(property_id)

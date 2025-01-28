@@ -1,12 +1,11 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
-from . import views
 from .views import UpdateLocationView, PropertyViewSet
 from rest_framework_nested import routers
 
 router = routers.SimpleRouter()
-router.register("property", views.PropertyViewSet, basename="property")
+router.register("property", PropertyViewSet, basename="property")
 
 urlpatterns = [
     path('api/properties/<int:pk>/update-location/', UpdateLocationView.as_view(), name='update-location'),

@@ -154,8 +154,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SAAS = {
     "PROCESSOR": {
         "BACKEND": "saas.backends.flutterwave_processor.FlutterwaveBackend",
-        "PRIV_KEY": "...",
-        "PUB_KEY": "...",
+        "PRIV_KEY": config("FLUTTERWAVE_SECRET_KEY"),
+        "PUB_KEY": config("FLUTTERWAVE_PULIC_KEY"),
     }
 }
 

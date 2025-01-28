@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from accounts.models import Audit
+from django.core.exceptions import ValidationError
+
 from services import DOCUMENT_TYPE_CHOICES, PROPERTY_STATUS_CHOICES
 class Category(Audit):
     name = models.CharField(max_length=100, unique=True)
@@ -15,9 +17,16 @@ class Subcategory(Audit):
     
     class Meta:
         unique_together = ('category', 'name')
+    def clean(self):
+      if self.sub_category and self.category and self.sub_category.category != self.category:
+        raise ValidationError("Subcategory must belong to the selected category.")
     def __str__(self):
         return f"{self.name} (Under {self.category.name})"
     
+  
+def upload_property_documents(instance, filename):
+    return f"properties/{instance.property.id}/documents/{filename}"
+
 
 class Document(Audit):
     property = models.ForeignKey('Property', on_delete=models.CASCADE, related_name='documents')
@@ -25,7 +34,9 @@ class Document(Audit):
         max_length=50,
         choices=DOCUMENT_TYPE_CHOICES,
     )
-    file = models.FileField(upload_to='property_documents/', blank=True, null=True)
+    file = models.FileField(upload_to=upload_property_documents, blank=True, null=True)
+
+
     
     def __str__(self):
         return f"{self.document_type} for {self.property.title}"

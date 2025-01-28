@@ -23,4 +23,5 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("property/", include("client_app.urls")),
     path("social/", include("social.urls")), 
+    path("subscription", include("subscription.urls"))
 ]
