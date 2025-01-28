@@ -31,8 +31,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".vivaestate.localhost.com"]
 
 
-SHARED_APPS = [
-    "django_tenants",
+INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -44,16 +43,10 @@ SHARED_APPS = [
     "app",
     "subscription",
     "social",
+    "client_app",
 ]
 
-TENANT_APPS = ["client_app"]
-# Application definition
-
-INSTALLED_APPS = SHARED_APPS + [app for app in TENANT_APPS if app not in SHARED_APPS]
-
-
 MIDDLEWARE = [
-    "django_tenants.middleware.main.TenantMainMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -89,7 +82,7 @@ WSGI_APPLICATION = "drf_project.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django_tenants.postgresql_backend",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": config("DATABASE_NAME"),
         "USER": config("DATABASE_USER"),
         "PASSWORD": config("DATABASE_PASSWORD"),
@@ -98,7 +91,7 @@ DATABASES = {
     }
 }
 
-DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
+
 
 
 # EMAIL
@@ -171,16 +164,6 @@ SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
 
 AUTH_USER_MODEL = "accounts.User"
 
-TENANT_MODEL = "app.Client"
-
-TENANT_DOMAIN_MODEL = "app.Domain"
-
-PUBLIC_SCHEMA_URLCONF = "drf_project.urls"
-
-DOMAIN_NAME = config("DOMAIN_NAME")
-TENANT_DOMAINS = {
-    "localhost": "public",  # Associate localhost with the public schema
-}
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

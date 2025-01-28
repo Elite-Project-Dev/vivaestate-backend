@@ -28,7 +28,7 @@ from accounts.serializers import (
     SignupSerializer,
     LoginSerializer,
 )
-from app.models import AgentProfile, Client, Domain
+from app.models import AgentProfile
 from services import (
     CustomResponseMixin,
     send_password_reset_email,
@@ -194,43 +194,15 @@ class VerifyCodeView(CustomResponseMixin, APIView):
 
         user.is_active = True
         user.save()
-        agency_name = user_data.get("agency_name")
-        contact_info = user_data.get("contact_info")
         if user.is_agent:
-            sanitized_agency_name = re.sub(r"[^a-z0-9-]", "-", agency_name.lower())
-            sanitized_agency_name = sanitized_agency_name.strip("-").strip(".")
-
-            domain_name = settings.DOMAIN_NAME
-            subdomain = f"{sanitized_agency_name}.{domain_name}"
-
-            if Domain.objects.filter(domain=subdomain).exists():
-                return self.custom_response(
-                    status=status.HTTP_400_BAD_REQUEST,
-                    message=f"The domain '{subdomain}' already exists.",
-                )
-            trial_duration = getattr(settings, "TRIAL_DURATION_DAYS", 90)
-            paid_until = date.today() + timedelta(days=trial_duration)
+            agency_name = user_data.get("agency_name")
+            contact_info = user_data.get("contact_info")
             try:
-                client = Client.objects.create(
+                AgentProfile.objects.create(
                     user=user,
-                    name=agency_name,
-                    paid_until=paid_until,
-                    on_trial=True,
+                    agency_name=agency_name,
+                    contact_info=contact_info,
                 )
-                client.save()
-
-                Domain.objects.create(
-                    user=user,
-                    domain=subdomain,
-                    tenant=client,
-                )
-                with schema_context(client.schema_name):
-                    AgentProfile.objects.create(
-                        client=client,
-                        user=user,
-                        agency_name=agency_name,
-                        contact_info=contact_info,
-                    )
             except Exception as e:
                 user.delete()
                 return self.custom_response(
@@ -274,50 +246,18 @@ class EmailVerifyView(CustomResponseMixin, APIView):
             contact_info = user_data.get("contact_info")
 
             if user.is_agent:
-                sanitized_agency_name = re.sub(r"[^a-z0-9-]", "-", agency_name.lower())
-                sanitized_agency_name = sanitized_agency_name.strip("-").strip(".")
-
-                domain_name = settings.DOMAIN_NAME
-                subdomain = f"{sanitized_agency_name}.{domain_name}"
-
-                if Domain.objects.filter(domain=subdomain).exists():
-                    return self.custom_response(
-                        status=status.HTTP_400_BAD_REQUEST,
-                        message=f"The domain '{subdomain}' already exists.",
-                    )
-
-                trial_duration = getattr(settings, "TRIAL_DURATION_DAYS", 90)
-                paid_until = date.today() + timedelta(days=trial_duration)
-
                 try:
-                    client = Client.objects.create(
+                    AgentProfile.objects.create(
                         user=user,
-                        name=agency_name,
-                        paid_until=paid_until,
-                        on_trial=True,
+                        agency_name=agency_name,
+                        contact_info=contact_info,
                     )
-                    client.save()
-
-                    Domain.objects.create(
-                        user=user,
-                        domain=subdomain,
-                        tenant=client,
-                    )
-
-                    with schema_context(client.schema_name):
-                        AgentProfile.objects.create(
-                            client=client,
-                            user=user,
-                            agency_name=agency_name,
-                            contact_info=contact_info,
-                        )
                 except Exception as e:
                     user.delete()  # Rollback user activation if anything goes wrong
                     return self.custom_response(
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                         message=f"Error during creation: {str(e)}",
                     )
-
             # Clean up cached data
             cache.delete(f"user_data_{email}")
         except TypeError as ex:

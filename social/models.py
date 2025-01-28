@@ -2,7 +2,7 @@ from django.db import models
 from accounts.models import User, Audit
 from django.conf import settings
 from client_app.models import Property
-from app.models import Client
+from app.models import AgentProfile
 
 class Favourite(Audit):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -13,4 +13,4 @@ class Favourite(Audit):
 
 class Follow(Audit):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    agent = models.ForeignKey(Client, on_delete=models.CASCADE)
+    agent = models.ForeignKey(AgentProfile, on_delete=models.CASCADE)
