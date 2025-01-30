@@ -148,9 +148,14 @@ SAAS = {
     "PROCESSOR": {
         "BACKEND": "saas.backends.flutterwave_processor.FlutterwaveBackend",
         "PRIV_KEY": config("FLUTTERWAVE_SECRET_KEY"),
-        "PUB_KEY": config("FLUTTERWAVE_PULIC_KEY"),
+        "PUB_KEY": config("FLUTTERWAVE_PUBLIC_KEY"),
     }
 }
+
+FLUTTERWAVE_SECRET_KEY = config("FLUTTERWAVE_SECRET_KEY")
+FLUTTERWAVE_PUBLIC_KEY = config("FLUTTERWAVE_PUBLIC_KEY")
+
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

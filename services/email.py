@@ -9,7 +9,8 @@ from django.core.mail import EmailMessage
 from django.core.signing import Signer
 from django.urls import reverse
 from django.utils.crypto import get_random_string
-from django.utils.encoding import DjangoUnicodeDecodeError, smart_bytes, smart_str
+from django.utils.encoding import (DjangoUnicodeDecodeError, smart_bytes,
+                                   smart_str)
 from django.utils.html import format_html
 from django.utils.http import urlsafe_base64_encode
 

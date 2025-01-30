@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 
+
 # Agent profile model that will be tenant-specific
 class AgentProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

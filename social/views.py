@@ -1,11 +1,13 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status, views
 from rest_framework.permissions import IsAuthenticated
-from client_app.models import Property
-from .models import Favourite
-from services import CustomResponseMixin
-from django.shortcuts import get_object_or_404
-from .serializers import PropertySerializer
 from rest_framework.views import APIView
+
+from client_app.models import Property
+from services import CustomResponseMixin
+
+from .models import Favourite
+from .serializers import PropertySerializer
 
 
 class FavouritePropertyView(APIView, CustomResponseMixin):

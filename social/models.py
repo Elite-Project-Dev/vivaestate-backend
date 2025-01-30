@@ -1,8 +1,10 @@
-from django.db import models
-from accounts.models import User, Audit
 from django.conf import settings
-from client_app.models import Property
+from django.db import models
+
+from accounts.models import Audit, User
 from app.models import AgentProfile
+from client_app.models import Property
+
 
 class Favourite(Audit):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

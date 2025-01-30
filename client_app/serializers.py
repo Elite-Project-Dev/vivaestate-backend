@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Category, Subcategory, Document, Property
+
+from .models import Category, Document, Property, Subcategory
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

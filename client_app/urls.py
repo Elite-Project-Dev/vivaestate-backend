@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import path, include
-from .views import UpdateLocationView, PropertyViewSet
+from django.urls import include, path
 from rest_framework_nested import routers
+
+from .views import PropertyViewSet, UpdateLocationView
 
 router = routers.SimpleRouter()
 router.register("property", PropertyViewSet, basename="property")

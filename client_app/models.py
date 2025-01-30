@@ -1,9 +1,11 @@
-from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
-from accounts.models import Audit
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
+from accounts.models import Audit
 from services import DOCUMENT_TYPE_CHOICES, PROPERTY_STATUS_CHOICES
+
+
 class Category(Audit):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
@@ -17,9 +19,6 @@ class Subcategory(Audit):
     
     class Meta:
         unique_together = ('category', 'name')
-    def clean(self):
-      if self.sub_category and self.category and self.sub_category.category != self.category:
-        raise ValidationError("Subcategory must belong to the selected category.")
     def __str__(self):
         return f"{self.name} (Under {self.category.name})"
     

@@ -18,22 +18,15 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import User
-from accounts.serializers import (
-    AgentSignupSerializer,
-    PasswordResetTokenGenerator,
-    ResendEmailSerializer,
-    ResetPasswordEmailRequestSerializer,
-    ResetPasswordSerializer,
-    SetNewPasswordSerializer,
-    SignupSerializer,
-    LoginSerializer,
-)
+from accounts.serializers import (AgentSignupSerializer, LoginSerializer,
+                                  PasswordResetTokenGenerator,
+                                  ResendEmailSerializer,
+                                  ResetPasswordEmailRequestSerializer,
+                                  ResetPasswordSerializer,
+                                  SetNewPasswordSerializer, SignupSerializer)
 from app.models import AgentProfile
-from services import (
-    CustomResponseMixin,
-    send_password_reset_email,
-    send_signup_verification_email,
-)
+from services import (CustomResponseMixin, send_password_reset_email,
+                      send_signup_verification_email)
 
 logger = logging.getLogger(__file__)
 

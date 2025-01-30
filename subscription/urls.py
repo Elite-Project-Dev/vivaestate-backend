@@ -1,6 +1,8 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import SubscriptionPlanViewSet, SubscriptionViewSet,flutterwave_webhook
+
+from .views import (SubscriptionPlanViewSet, SubscriptionViewSet,
+                    flutterwave_webhook)
 
 router = DefaultRouter()
 router.register(r'subscription-plans', SubscriptionPlanViewSet)

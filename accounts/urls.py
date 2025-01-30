@@ -1,14 +1,8 @@
 from django.urls import path
 
-from .views import (
-    AgentSignupView,
-    EmailVerifyView,
-    PasswordTokenCheckAPI,
-    ResendEmailView,
-    UserSignupView,
-    VerifyCodeView,
-    LoginView,
-)
+from .views import (AgentSignupView, EmailVerifyView, LoginView,
+                    PasswordTokenCheckAPI, ResendEmailView, UserSignupView,
+                    VerifyCodeView)
 
 urlpatterns = [
     path("agent/signup/", AgentSignupView.as_view(), name="agent-signup"),

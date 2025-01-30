@@ -1,12 +1,17 @@
 from rest_framework import serializers
-from .models import SubscriptionPlan, Subscription
+
+from .models import Subscription, SubscriptionPlan
+
 
 class SubscriptionPlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubscriptionPlan
-        fields = '__all__'
+        fields = ['id', 'name', 'amount', 'interval', 'duration', 'flutterwave_plan_id']
+        read_only_fields = ['id', 'flutterwave_plan_id']
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    plan = serializers.PrimaryKeyRelatedField(queryset=SubscriptionPlan.objects.all())  # Enables dropdown in DRF UI
     class Meta:
         model = Subscription
-        fields = '__all__'
+        fields = ['id', 'user', 'plan', 'flutterwave_subscription_id', 'status','start_date', 'end_date']
+        read_only_fields = ['id', 'flutterwave_subscription_id', 'status', 'start_date', 'end_date']

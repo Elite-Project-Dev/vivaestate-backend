@@ -1,12 +1,15 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Property
-from services import CustomResponseMixin
-from rest_framework import  status, viewsets
-from .serializers import PropertySerializer
-from accounts.permission import IsAgent
+from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from accounts.permission import IsAgent
+from services import CustomResponseMixin
+
+from .models import Property
+from .serializers import PropertySerializer
+
+
 class UpdateLocationView(APIView):
     def put(self, request, pk):
         try:

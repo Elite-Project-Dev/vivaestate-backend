@@ -1,15 +1,24 @@
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+import json
+import uuid
+from datetime import timedelta
+from hashlib import sha512
+
+import requests
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from .models import SubscriptionPlan, Subscription
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from services import CustomResponseMixin
+
+from .models import Subscription, SubscriptionPlan
 from .serializers import SubscriptionPlanSerializer, SubscriptionSerializer
 from .utils import create_payment_plan
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-import json
-from django.conf import settings
-import requests
-from services import CustomResponseMixin
+
+
 class SubscriptionPlanViewSet(viewsets.ModelViewSet):
     queryset = SubscriptionPlan.objects.all()
     serializer_class = SubscriptionPlanSerializer
@@ -29,6 +38,7 @@ class SubscriptionPlanViewSet(viewsets.ModelViewSet):
 class SubscriptionViewSet(viewsets.ModelViewSet, CustomResponseMixin):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
+    permission_classes = [IsAuthenticated]
 
     @action(detail=False, methods=['post'])
     def initiate_payment(self, request):
@@ -36,51 +46,67 @@ class SubscriptionViewSet(viewsets.ModelViewSet, CustomResponseMixin):
         plan_id = request.data.get('plan_id')
         try:
             plan = SubscriptionPlan.objects.get(id=plan_id)
+            tx_ref = f"sub_{user.id}_{plan.id}_{uuid.uuid4()}"
             # Initialize payment with Flutterwave
             payment_data = {
-                "tx_ref": f"sub_{user.id}_{plan.id}",  # Unique reference
-                "amount": int(plan.amount * 100),  # Convert to smallest currency unit
+                "tx_ref": tx_ref,  # Unique reference
+                "amount": int(plan.amount), 
                 "currency": "NGN",
                 "payment_plan": plan.flutterwave_plan_id,
-                "redirect_url": "https://yourwebsite.com/payment-callback",
+                "redirect_url": "http://localhost:8000/payment-callback",
                 "customer": {
                     "email": user.email,
                 }
             }
-            # Make API request to Flutterwave
-            url = "https://api.flutterwave.com/v3/payments"
-            headers = {
-                "Authorization": f"Bearer {settings.FLUTTERWAVE_SECRET_KEY}", 
-                "Content-Type": "application/json"
-            }
-            response = requests.post(url, json=payment_data, headers=headers)
-            if response.status_code == 200:
-                return Response(response.json()['data']['link'], status=status.HTTP_200_OK)
+            response = requests.post(
+                "https://api.flutterwave.com/v3/payments",
+                json=payment_data,
+                headers={
+                    "Authorization": f"Bearer {settings.FLUTTERWAVE_SECRET_KEY}",
+                    "Content-Type": "application/json",
+                },)
+            if response.status_code in [200, 201]:
+                return Response(response.json().get('data', {}).get('link'), status=status.HTTP_200_OK)
             else:
-                return self.custom_response(message= "Failed to initiate payment", status=status.HTTP_400_BAD_REQUEST)
+                return self.custom_response(
+                    message=f"Payment initiation failed: {response.json().get('message', 'Unknown error')}",
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         except SubscriptionPlan.DoesNotExist:
-            return self.custom_response(message= "Plan not found", status=status.HTTP_404_NOT_FOUND)
-        
+            return self.custom_response(message="Plan not found", status=status.HTTP_404_NOT_FOUND)
+
 @csrf_exempt
 def flutterwave_webhook(request):
     if request.method == 'POST':
+        signature = request.headers.get('verif-hash')
+        if not signature or signature != sha512(settings.FLUTTERWAVE_SECRET_KEY.encode()).hexdigest():
+            return JsonResponse({"status": "invalid signature"}, status=400)
+
         payload = json.loads(request.body)
-        event = payload.get('event')
-        data = payload.get('data')
-
-        if event == 'charge.completed':
-            subscription_id = data.get('payment_plan')
-            tx_ref = data.get('tx_ref')
-            user_id = tx_ref.split('_')[1]  # Extract user ID from tx_ref
-            plan_id = tx_ref.split('_')[2]  # Extract plan ID from tx_ref
-
-            # Create subscription record
-            Subscription.objects.create(
-                user_id=user_id,
-                plan_id=plan_id,
-                flutterwave_subscription_id=subscription_id,
-                status='active'
-            )
-
-        return JsonResponse({"status": "success"})
+        try:
+            event = payload['event']
+            data = payload['data']
+            if event == 'charge.completed':
+                subscription_id = data['payment_plan']
+                tx_ref = data['tx_ref']
+                user_id, plan_id = tx_ref.split('_')[1:3]
+                subscription, created = Subscription.objects.get_or_create(
+                    user_id=user_id,
+                    plan_id=plan_id,
+                    flutterwave_subscription_id=subscription_id,
+                    defaults={"status": "active"}
+                )
+                if created:
+                    plan = subscription.plan
+                    if plan.interval == 'monthly':
+                        subscription.end_date = subscription.start_date + timedelta(days=30 * plan.duration)  
+                    elif plan.interval == 'yearly':
+                        subscription.end_date = subscription.start_date + timedelta(days=365 * plan.duration) 
+                    subscription.save()
+                return JsonResponse({"status": "success"})
+        except (KeyError, IndexError, ValueError):
+            return JsonResponse({"status": "invalid payload"}, status=400)
     return JsonResponse({"status": "error"}, status=400)
+
+
+
