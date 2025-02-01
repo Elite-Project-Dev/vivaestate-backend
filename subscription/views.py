@@ -11,29 +11,37 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from requests.exceptions import ConnectionError, Timeout, RequestException
+from rest_framework.response import Response
 
 from services import CustomResponseMixin
 
 from .models import Subscription, SubscriptionPlan
 from .serializers import SubscriptionPlanSerializer, SubscriptionSerializer
 from .utils import create_payment_plan
+from services import CustomResponseMixin
 
-
-class SubscriptionPlanViewSet(viewsets.ModelViewSet):
+class SubscriptionPlanViewSet(viewsets.ModelViewSet, CustomResponseMixin):
     queryset = SubscriptionPlan.objects.all()
     serializer_class = SubscriptionPlanSerializer
 
     def perform_create(self, serializer):
-        instance = serializer.save()
-        # Create payment plan in Flutterwave
-        plan_id = create_payment_plan(
-            name=instance.name,
-            amount=int(instance.amount * 100),
-            interval=instance.interval,
-            duration=instance.duration
-        )
-        instance.flutterwave_plan_id = plan_id
-        instance.save()
+        try:
+            plan_id = create_payment_plan(
+                name=instance.name,
+                amount=int(instance.amount),
+                interval=instance.interval,
+                duration=instance.duration
+            )
+            instance = serializer.save(flutterwave_plan_id=plan_id)
+        except ConnectionError:
+            return self.custom_response(message= "Failed to connect to Flutterwave API. Please check your internet connection.", status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except Timeout:
+            return self.custom_response(message= "Flutterwave API request timed out. Try again later.", status=status.HTTP_504_GATEWAY_TIMEOUT)
+        except RequestException as e:
+            return self.custom_response(message= f"An error occurred: {str(e)}", status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return self.custom_response(message= f"Create Subscription Failed: {str(e)}", status=status.HTTP_400_BAD_REQUEST)
 
 class SubscriptionViewSet(viewsets.ModelViewSet, CustomResponseMixin):
     queryset = Subscription.objects.all()

@@ -8,6 +8,10 @@ class SubscriptionPlanSerializer(serializers.ModelSerializer):
         model = SubscriptionPlan
         fields = ['id', 'name', 'amount', 'interval', 'duration', 'flutterwave_plan_id']
         read_only_fields = ['id', 'flutterwave_plan_id']
+    def validate_amount(self, value):
+        if value < 0: 
+            raise serializers.ValidationError("Amount cannot be negative.")
+        return value
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     plan = serializers.PrimaryKeyRelatedField(queryset=SubscriptionPlan.objects.all())  # Enables dropdown in DRF UI
