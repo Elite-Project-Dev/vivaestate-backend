@@ -183,3 +183,11 @@ SIMPLE_JWT = {
     'ALGORITHM': 'HS256',  # Algorithm used for signing tokens
     'SIGNING_KEY': 'your-secret-key',  # Secret key for signing the tokens
 }
+
+
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Assuming Redis is running locally
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
