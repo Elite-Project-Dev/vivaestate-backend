@@ -1,10 +1,12 @@
 from django.utils.timezone import now
-from rest_framework.permissions import BasePermission, IsAuthenticated
-from rest_framework.views import APIView
-
-from app.models import AgentProfile
-from services import CustomResponseMixin
+from rest_framework.permissions import BasePermission
+from accounts.models import AgentProfile
 from subscription.models import Subscription
+
+
+class IsAdmin(BasePermission):
+     def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated and request.user.is_superuser)
 
 
 class IsAgent(BasePermission):
@@ -35,11 +37,3 @@ class HasActiveSubscription(BasePermission):
         
         return has_active_subscription
 
-class SubscriptionProtectedView(APIView, CustomResponseMixin):
-    """
-    This view is only accessible to users with an active subscription.
-    """
-    permission_classes = [IsAuthenticated, HasActiveSubscription]
-
-    def get(self, request):
-        return self.custom_response(message= "You have access to this feature because you are subscribed!")

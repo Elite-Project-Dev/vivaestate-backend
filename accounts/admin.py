@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User, UserProfile, UserRole
+from .models import User, UserProfile, UserRole,  AgentProfile
 
 
 @admin.register(UserProfile)
@@ -73,3 +73,14 @@ class UserAdmin(BaseUserAdmin):
 
 # Register the custom User model with the custom UserAdmin
 admin.site.register(User, UserAdmin)
+
+
+
+
+
+
+@admin.register(AgentProfile)
+class AgentProfileAdmin(admin.ModelAdmin):
+    list_display = ("agency_name", "user", "license_number")
+    search_fields = ("agency_name", "user__username", "license_number")
+    ordering = ("agency_name",)

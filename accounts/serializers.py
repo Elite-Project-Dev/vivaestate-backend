@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
 from accounts.models import User
-from app.models import AgentProfile
+from .models import AgentProfile
 
 
 class SignupSerializer(serializers.ModelSerializer):

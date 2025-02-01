@@ -24,7 +24,7 @@ from accounts.serializers import (AgentSignupSerializer, LoginSerializer,
                                   ResetPasswordEmailRequestSerializer,
                                   ResetPasswordSerializer,
                                   SetNewPasswordSerializer, SignupSerializer)
-from app.models import AgentProfile
+from accounts.models import AgentProfile
 from services import (CustomResponseMixin, send_password_reset_email,
                       send_signup_verification_email)
 

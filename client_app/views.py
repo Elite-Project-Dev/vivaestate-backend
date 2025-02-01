@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.permission import IsAgent
+from vivaestate_backend.services.permission import IsAgent
 from services import CustomResponseMixin
 
 from .models import Property
