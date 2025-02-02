@@ -2,15 +2,13 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from vivaestate_backend.services.permission import IsAgent
-from services import CustomResponseMixin
-
+from services import CustomResponseMixin, IsAgent, HasActiveSubscription
 from .models import Property
 from .serializers import PropertySerializer
 
 
 class UpdateLocationView(APIView):
+    permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]
     def put(self, request, pk):
         try:
             property = Property.objects.get(pk=pk)
@@ -74,5 +72,5 @@ class PropertyViewSet(CustomResponseModelViewSet):
         if self.request.method == "GET":
             permission_classes = [AllowAny]
         else:
-            permission_classes = [IsAuthenticated, IsAgent]
+            permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]
         return [permission() for permission in permission_classes]

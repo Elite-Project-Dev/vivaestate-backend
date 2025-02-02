@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from accounts.models import Audit, User
-from app.models import AgentProfile
+from accounts.models import AgentProfile
 from client_app.models import Property
 
 
