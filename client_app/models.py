@@ -3,26 +3,10 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from accounts.models import Audit
-from services import DOCUMENT_TYPE_CHOICES, PROPERTY_STATUS_CHOICES
+from services import DOCUMENT_TYPE_CHOICES, PROPERTY_STATUS_CHOICES, PROPERTY_TYPES
 
 
-class Category(Audit):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return self.name
-class Subcategory(Audit):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
-    name = models.CharField(max_length=100)
-    description = models.TextField(blank=True, null=True)
-    
-    class Meta:
-        unique_together = ('category', 'name')
-    def __str__(self):
-        return f"{self.name} (Under {self.category.name})"
-    
-  
 def upload_property_documents(instance, filename):
     return f"properties/{instance.property.id}/documents/{filename}"
 
@@ -39,15 +23,20 @@ class Document(Audit):
     
     def __str__(self):
         return f"{self.document_type} for {self.property.title}"
+class Location(models.Model):
+    city = models.CharField(max_length=255)
+    state = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.city}, {self.state}, {self.country}"
 
 class Property(Audit):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='properties',blank=True, null=True)
-    sub_category = models.ForeignKey(Subcategory, on_delete=models.CASCADE,blank=True, null=True)
     title = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    property_type = models.CharField(max_length=50, choices=PROPERTY_TYPES)
     description = models.TextField(blank=True, null=True)
-    location = models.CharField(max_length=255)
-    property_type = models.CharField(max_length=50)  # E.g., 'Apartment', 'House', etc.
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
     bedrooms = models.IntegerField(blank=True, null=True)
     bathrooms = models.IntegerField(blank=True, null=True)
     square_feet = models.IntegerField(blank=True, null=True)

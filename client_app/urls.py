@@ -10,8 +10,19 @@ router.register("property", PropertyViewSet, basename="property")
 
 urlpatterns = [
     path('api/properties/<int:pk>/update-location/', UpdateLocationView.as_view(), name='update-location'),
+    path('properties/affordable/', PropertyViewSet.as_view({'get': 'list'}),
+         {'price_max': 50000}),
+    path('properties/luxury/', PropertyViewSet.as_view({'get': 'list'}),
+         {'price_min': 500000}),
+    path('properties/rentals/', PropertyViewSet.as_view({'get': 'list'}),
+         {'for_rent': True}),
+    path('properties/for-sale/', PropertyViewSet.as_view({'get': 'list'}),
+         {'for_sale': True}),
     path("", include(router.urls)),
+    path('properties/commercial/', PropertyViewSet.as_view({'get': 'list'}),
+         {'property_type': 'commercial'}),
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -18,7 +18,8 @@ dependencies = [
     "drf-nested-routers (>=0.94.1,<0.95.0)",
     "djangorestframework-simplejwt (>=5.4.0,<6.0.0)",
     "celery (>=5.4.0,<6.0.0)",
-    "redis (>=5.2.1,<6.0.0)"
+    "redis (>=5.2.1,<6.0.0)",
+    "django-filter (>=24.3,<25.0)"
 ]
 
 

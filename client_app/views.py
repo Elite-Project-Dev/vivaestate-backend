@@ -5,6 +5,9 @@ from rest_framework.views import APIView
 from services import CustomResponseMixin, IsAgent, HasActiveSubscription
 from .models import Property
 from .serializers import PropertySerializer
+from django.utils import timezone
+from datetime import timedelta
+from rest_framework.decorators import action
 
 
 class UpdateLocationView(APIView):
@@ -68,9 +71,35 @@ class CustomResponseModelViewSet(CustomResponseMixin, viewsets.ModelViewSet):
 class PropertyViewSet(CustomResponseModelViewSet):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
+    search_fields = ['title', 'description']
+    ordering_fields = ['price', 'created_at', 'square_feet']
     def get_permissions(self):
         if self.request.method == "GET":
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]
         return [permission() for permission in permission_classes]
+    @action(detail=False, methods=['get'])
+    def new_listings(self, request):
+        recent = timezone.now() - timedelta(days=7)
+        queryset = self.filter_queryset(self.get_queryset()).filter(created_at__gte=recent)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    @action(detail=False, methods=['get'])
+    def nearby(self, request):
+        lat = request.query_params.get('lat')
+        lng = request.query_params.get('lng')
+        radius = float(request.query_params.get('radius', 10))
+        if not (lat and lng):
+            return Response({"error": "Missing lat/lng parameters"}, status=400)
+        queryset = self.filter_queryset(self.get_queryset())
+        nearby_properties = []
+        for prop in queryset:
+            if prop.latitude and prop.longitude:
+                dist = self.calculate_distance(float(lat), float(lng), 
+                                             float(prop.latitude), float(prop.longitude))
+                if dist <= radius:
+                    nearby_properties.append(prop)
+        
+        serializer = self.get_serializer(nearby_properties, many=True)
+        return Response(serializer.data)

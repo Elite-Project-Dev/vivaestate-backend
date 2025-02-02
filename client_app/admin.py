@@ -3,21 +3,6 @@ from django.contrib import admin
 from .models import Category, Document, Property, Subcategory
 
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'created_at',)
-    search_fields = ('name',)
-    ordering = ('name',)
-
-
-@admin.register(Subcategory)
-class SubcategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'description', 'created_at',)
-    search_fields = ('name', 'category__name')
-    list_filter = ('category',)
-    ordering = ('category', 'name')
-
-
 @admin.register(Property)
 class PropertyAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'sub_category', 'price', 'status', 'for_sale', 'for_rent', 'location', 'created_at',)
