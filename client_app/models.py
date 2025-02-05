@@ -23,20 +23,13 @@ class Document(Audit):
     
     def __str__(self):
         return f"{self.document_type} for {self.property.title}"
-class Location(models.Model):
-    city = models.CharField(max_length=255)
-    state = models.CharField(max_length=255)
-    country = models.CharField(max_length=255)
-
-    def __str__(self):
-        return f"{self.city}, {self.state}, {self.country}"
 
 class Property(Audit):
     title = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     property_type = models.CharField(max_length=50, choices=PROPERTY_TYPES)
     description = models.TextField(blank=True, null=True)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    location = models.PointField(geography=True)
     bedrooms = models.IntegerField(blank=True, null=True)
     bathrooms = models.IntegerField(blank=True, null=True)
     square_feet = models.IntegerField(blank=True, null=True)
@@ -50,3 +43,6 @@ class Property(Audit):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True, validators=[MinValueValidator(-180.0), MaxValueValidator(180.0)])
     def __str__(self):
         return self.title
+    def is_visible(self):
+        """Checks if the agent has an active subscription"""
+        return self.user.subscription.active if hasattr(self.agent, 'subscription') else False

@@ -82,7 +82,7 @@ WSGI_APPLICATION = "drf_project.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": 'django.contrib.gis.db.backends.postgis',
         "NAME": config("DATABASE_NAME"),
         "USER": config("DATABASE_USER"),
         "PASSWORD": config("DATABASE_PASSWORD"),
@@ -194,3 +194,5 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+os.environ['GDAL_LIBRARY_PATH'] = r"C:\OSGeo4W64\bin\gdal304.dll"
