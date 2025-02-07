@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "subscription",
     "social",
     "client_app",
+    "agent_crm",
 ]
 
 MIDDLEWARE = [

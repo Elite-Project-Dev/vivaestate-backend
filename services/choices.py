@@ -44,3 +44,9 @@ PROPERTY_TYPES = [
     ('vacation_home', 'Vacation Home'),
     ('co_working_space', 'Co-working Space'),
 ]
+LEAD_STATUS_CHOICES = [
+        ('new', 'New'),
+        ('contacted', 'Contacted'),
+        ('follow_up', 'Follow Up'),
+        ('closed', 'Closed'),
+    ]
