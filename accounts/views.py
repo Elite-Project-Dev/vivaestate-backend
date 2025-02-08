@@ -25,8 +25,8 @@ from accounts.serializers import (AgentSignupSerializer, LoginSerializer,
                                   ResetPasswordSerializer,
                                   SetNewPasswordSerializer, SignupSerializer)
 from accounts.models import AgentProfile
-from services import (CustomResponseMixin, send_password_reset_email,
-                      send_signup_verification_email)
+from services import CustomResponseMixin, EmailService
+                      
 
 logger = logging.getLogger(__file__)
 
@@ -41,7 +41,8 @@ class UserSignupView(APIView, CustomResponseMixin):
             user_data = serializer.validated_data
             email = user_data["email"]
             try:
-                send_signup_verification_email(request, user_data)
+                email_service = EmailService()
+                email_service.send_signup_verification_email(request, user_data)
                 return self.custom_response(
                     status=status.HTTP_201_CREATED,
                     message="Registration initiated. Please check your email to verify your account.",
@@ -80,7 +81,8 @@ class AgentSignupView(APIView, CustomResponseMixin):
                 timeout=3600,
             )  # Cache expires in 1 hour
             try:
-                send_signup_verification_email(request, user_data)
+                email_service = EmailService()
+                email_service.send_signup_verification_email(request, user_data)
                 return self.custom_response(
                     status=status.HTTP_201_CREATED,
                     message="Registration initiated. Please check your email to verify your account.",
@@ -122,8 +124,8 @@ class ResendEmailView(CustomResponseMixin, APIView):
             user = User.objects.get(email=email)
             if user.is_active:
                 return self.custom_response(message="Account is already verified.")
-
-            send_signup_verification_email(request, user, "email-verify")
+            email_service = EmailService()
+            email_service.send_signup_verification_email(request, user, "email-verify")
             return self.custom_response(
                 status=status.HTTP_201_CREATED,
                 message="Registration initiated. Please check your email to verify your account.",
@@ -292,7 +294,8 @@ class RequestPasswordEmail(CustomResponseMixin, generics.GenericAPIView):
             user = User.objects.get(email=email)
 
             try:
-                send_password_reset_email(request, user)
+                email_service = EmailService()
+                email_service.send_password_reset_email(request, user)
                 return self.custom_response(
                     status=status.HTTP_201_CREATED,
                     message="Registration initiated. Please check your email to verify your account.",

@@ -106,7 +106,6 @@ class PropertyViewSet(CustomResponseModelViewSet):
         except (TypeError, ValueError):
             return Response({"error": "Invalid or missing latitude, longitude, or radius parameters"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Calculate an approximate bounding box for the given radius.
         # 1 degree of latitude is roughly 111 km.
         lat_delta = radius / 111.0
         # For longitude, the distance per degree varies based on latitude.

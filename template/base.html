@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{% endblock title %}</title>
+  </head>
+  <body
+    style="
+    font-family: Arial, Helvetica, sans-serif;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: aliceblue;"></body>
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      style="
+        max-width: 600px;
+        margin: 0 auto;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        background-color: #ffffff;
+      "
+    >
+      <tbody>
+        <tr>
+          <td
+            style="
+              padding-top: 10px;
+              padding-bottom: 10px;
+              text-align: center;
+              color: #ffffff;
+              width: 100%;">
+              <img
+              src="https://vlv-ambidexters.s3.eu-north-1.amazonaws.com/skillhubs-assets/skillhubslogo_main.jpg"
+              alt="SkillHubs Logo"
+              class="SkillHubsLogo"
+              width="auto"
+              height="auto"
+              style="max-width: 100%; height: auto"
+            />
+            </td>
+        </tr>
+           <td style="padding: 20px;">
+          {% block main %}{% endblock main %}  
+          <br>
+          <p><hr></p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0px 20px 0px 20px; text-align: center; color: #ffffff; width: 100%;">
+                <a href="https://www.linkedin.com/company/ambidexters-inc"><img src="https://vlv-ambidexters.s3.eu-north-1.amazonaws.com/ambidexters-assets/email-assets/linkedin2.png" alt="Ambidexters Logo"  width="5%" height="5%" style="max-width: 100%; height: auto"></a>
+                <a href="https://www.instagram.com/ambidexters_llc"><img src="https://vlv-ambidexters.s3.eu-north-1.amazonaws.com/ambidexters-assets/email-assets/insta.png" alt="Ambidexters Logo"  width="5%" height="5%"  style="max-width: 100%; height: auto"></a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px; text-align: center">
+              <small style="margin: 0 0 16px">
+                Copyright &copy; 2025 Naija Realtors. Ifetele, Ifo Local Government, 
+                Ogun State, Nigeria. All rights reserved.
+             </small>
+             
+            </td>
+          </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+</html>

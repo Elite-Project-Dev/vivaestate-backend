@@ -1,0 +1,18 @@
+{% extends "base.html"}
+{% block title %} Naija Realtors {% endblock title %}
+{% block main %}
+   <p>Hi {{first_name}}</p>
+   <p> Thank you for signing up! Please verify your email by clicking the button below: </p>
+   <a href="{{verification_url}}" style="
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: hsl(180, 4%, 20%);
+      background-color: #08e60891;
+      text-decoration: none;
+      border-radius: 5px;
+  ">
+      Verify My Account
+    </a>
+     <p>If you didn't sign up for this account, please ignore this email.</p>
+{% endblock main %}
