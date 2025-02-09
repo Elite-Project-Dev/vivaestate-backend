@@ -44,12 +44,9 @@ class UserRole(Audit):
 
     def __str__(self):
         return f"{self.user.email} - {self.role}"
-from django.conf import settings
-from django.db import models
 
 
-# Agent profile model that will be tenant-specific
-class AgentProfile(models.Model):
+class AgentProfile(Audit):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     agency_name = models.CharField(max_length=255, unique=True)
     contact_info = models.TextField()
@@ -58,4 +55,5 @@ class AgentProfile(models.Model):
     address = models.CharField(max_length=255, blank=True)
     def __str__(self):
         return f"{self.agency_name} - {self.user.username}"
-
+    def get_agency_name(self):
+        return self.agency_name
