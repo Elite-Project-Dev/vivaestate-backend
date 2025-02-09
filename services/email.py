@@ -33,14 +33,25 @@ class EmailService:
     def send_signup_verification_email(self, request, user):
         first_name = str(user.first_name).capitalize()
         verification_url = self.create_verification_url(request, user.email)
+        auth_code = get_random_string(length=6, allowed_chars="0123456789")
+        cache.set(f"auth_code_{user.email}", auth_code, timeout=900)  
+        user_data = {
+        "first_name": user.first_name,
+        "email": user.email,
+        "agency_name": getattr(user, "agency_name", ""),
+        "contact_info": getattr(user, "contact_info", ""),
+        }
+        cache.set(f"user_data_{user.email}", user_data, timeout=900)
         context ={
             "first_name": first_name,
-            "verification_url": verification_url
+            "verification_url": verification_url,
+            "auth_code": auth_code
         }
+        logger.info(f"Sending email to {user.email} with auth code {auth_code}")
         self.send_email(
             subject="Naija Realtors Account Verification",
             recipient_email=user.email,
-            template_name="accounts/vefication.html",
+            template_name="accounts/verification.html",
             context=context,
         )
     def create_verification_url(self, request, email):

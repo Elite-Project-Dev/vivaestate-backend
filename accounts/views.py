@@ -125,7 +125,7 @@ class ResendEmailView(CustomResponseMixin, APIView):
             if user.is_active:
                 return self.custom_response(message="Account is already verified.")
             email_service = EmailService()
-            email_service.send_signup_verification_email(request, user, "email-verify")
+            email_service.send_signup_verification_email(request, user)
             return self.custom_response(
                 status=status.HTTP_201_CREATED,
                 message="Registration initiated. Please check your email to verify your account.",

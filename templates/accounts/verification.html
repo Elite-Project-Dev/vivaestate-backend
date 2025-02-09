@@ -1,5 +1,5 @@
-{% extends "base.html"}
-{% block title %} Naija Realtors {% endblock title %}
+{% extends "base.html" %}
+{% block title %} Naija Realtors - Email Verification {% endblock title %}
 {% block main %}
    <p>Hi {{first_name}}</p>
    <p> Thank you for signing up! Please verify your email by clicking the button below: </p>
@@ -14,5 +14,7 @@
   ">
       Verify My Account
     </a>
-     <p>If you didn't sign up for this account, please ignore this email.</p>
+    <p>Or use this verification code:</p>
+    <h2 style="color: #08e608;">{{ auth_code }}</h2>
+    <p>If you didn't sign up for this account, please ignore this email.</p>
 {% endblock main %}
