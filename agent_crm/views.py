@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter, SearchFilter
 from .serializers import WhatsAppMessageSerializer
 from rest_framework.views import APIView
-
+from rest_framework.decorators import api_view
 
 class LeadViewSet(viewsets.ModelViewSet):
     queryset = Lead.objects.all().order_by('-created_at')
@@ -22,8 +22,4 @@ class LeadViewSet(viewsets.ModelViewSet):
             return Lead.objects.all()
         return Lead.objects.filter(assigned_agent=user)
     
-class SendWhatsAppMessage(APIView):
-    def post(self, request):
-        serializer= WhatsAppMessageSerializer(data=request.data)
-        if serializer.valid():
-            to = serializer.validate_data["to"]
+

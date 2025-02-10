@@ -8,20 +8,22 @@ from rest_framework.exceptions import AuthenticationFailed
 
 from accounts.models import User
 from .models import AgentProfile
-
+import phonenumbers
 
 class SignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
+    whatsapp_number = serializers.CharField(required=True)
 
     class Meta:
         model = User
-        fields = ["email", "username", "password", "first_name", "last_name"]
+        fields = ["email", "username", "password", "first_name", "last_name", "whatsapp_number"]
 
     def validate(self, attrs):
         username = attrs.get("username")
         email = attrs.get("email")
+        whatsapp_number = attrs.get("whatsapp_number")
         existing_user = User.objects.filter(username=username).first()
 
         if existing_user:
@@ -38,6 +40,13 @@ class SignupSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "A user with this email already exists and is active."
             )
+        try:
+            parsed_number = phonenumbers.parse(whatsapp_number, None)  # Auto-detect country
+            if not phonenumbers.is_valid_number(parsed_number):
+                raise serializers.ValidationError({"whatsapp_number": "Invalid phone number."})
+        except phonenumbers.NumberParseException:
+            raise serializers.ValidationError({"whatsapp_number": "Invalid phone number format."})
+
 
         return attrs
 
@@ -48,6 +57,7 @@ class SignupSerializer(serializers.ModelSerializer):
             password=validated_data["password"],
             first_name=validated_data["first_name"],
             last_name=validated_data["last_name"],
+            whatsapp_number=validated_data["whatsapp_number"],
             is_active=False,
         )
         return user

@@ -22,7 +22,10 @@ dependencies = [
     "djaodjin-saas (>=1.0.0,<2.0.0)",
     "python-decouple (>=3.8,<4.0)",
     "celery (>=5.4.0,<6.0.0)",
-    "twilio (>=9.4.4,<10.0.0)"
+    "twilio (>=9.4.4,<10.0.0)",
+    "psycopg2-binary (>=2.9.10,<3.0.0)",
+    "phonenumbers (>=8.13.54,<9.0.0)",
+    "drf-yasg (>=1.21.8,<2.0.0)"
 ]
 
 
