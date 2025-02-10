@@ -21,7 +21,8 @@ dependencies = [
     "gis (>=0.2.1,<0.3.0)",
     "djaodjin-saas (>=1.0.0,<2.0.0)",
     "python-decouple (>=3.8,<4.0)",
-    "celery (>=5.4.0,<6.0.0)"
+    "celery (>=5.4.0,<6.0.0)",
+    "twilio (>=9.4.4,<10.0.0)"
 ]
 
 
