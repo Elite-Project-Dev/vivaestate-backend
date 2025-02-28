@@ -24,11 +24,11 @@ from drf_yasg import openapi
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Your API Documentation",
+        title="Real Estate SAAS Documentation",
         default_version="v1",
         description="API documentation for your Django project",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="your_email@example.com"),
+        contact=openapi.Contact(email="olamoyegunolamidesammy@gmail.com"),
         license=openapi.License(name="MIT License"),
     ),
     public=True,

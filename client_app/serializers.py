@@ -25,7 +25,7 @@ class PropertySerializer(serializers.ModelSerializer):
             'square_feet', 'status', 'image', 'video', 'documents', 'for_sale', 'for_rent',
             'latitude', 'longitude', 'location'
         ]
-    
+        
     def create(self, validated_data):
         return super().create(validated_data)
     

@@ -3,9 +3,7 @@ from .models import Lead
 from .serializers import LeadSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter, SearchFilter
-from .serializers import WhatsAppMessageSerializer
-from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+
 
 class LeadViewSet(viewsets.ModelViewSet):
     queryset = Lead.objects.all().order_by('-created_at')
