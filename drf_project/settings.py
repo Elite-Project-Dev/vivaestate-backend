@@ -41,11 +41,11 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     "django_filters",
-    "accounts",
-    "subscription",
-    "social",
-    "client_app",
-    "agent_crm",
+    "apps.accounts",
+    "apps.subscription",
+    "apps.social",
+    "apps.client_app",
+    "apps.agent_crm",
 ]
 
 MIDDLEWARE = [
