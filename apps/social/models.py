@@ -3,7 +3,7 @@ from django.db import models
 
 from accounts.models import Audit, User
 from accounts.models import AgentProfile
-from client_app.models import Property
+from properties.models import Property
 
 
 class Favourite(Audit):
