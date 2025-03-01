@@ -1,8 +1,8 @@
 from django.utils.timezone import now
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
-from accounts.models import AgentProfile
-from subscription.models import Subscription
+from apps.accounts.models import AgentProfile
+from apps.subscription.models import Subscription
 
 
 class IsAdmin(BasePermission):

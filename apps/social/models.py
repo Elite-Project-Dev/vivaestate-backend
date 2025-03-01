@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.db import models
 
-from accounts.models import Audit, User
-from accounts.models import AgentProfile
-from properties.models import Property
+from apps.accounts.models import Audit, User
+from apps.accounts.models import AgentProfile
+from apps.properties.models import Property
 
 
 class Favourite(Audit):

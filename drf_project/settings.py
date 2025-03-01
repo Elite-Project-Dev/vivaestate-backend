@@ -40,11 +40,12 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "drf_yasg",
+    "drf_spectacular",
     "django_filters",
     "apps.accounts",
     "apps.subscription",
     "apps.social",
-    "apps.client_app",
+    "apps.properties",
     "apps.agent_crm",
 ]
 
@@ -146,13 +147,6 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SAAS = {
-    "PROCESSOR": {
-        "BACKEND": "saas.backends.flutterwave_processor.FlutterwaveBackend",
-        "PRIV_KEY": config("FLUTTERWAVE_SECRET_KEY"),
-        "PUB_KEY": config("FLUTTERWAVE_PUBLIC_KEY"),
-    }
-}
 
 FLUTTERWAVE_SECRET_KEY = config("FLUTTERWAVE_SECRET_KEY")
 FLUTTERWAVE_PUBLIC_KEY = config("FLUTTERWAVE_PUBLIC_KEY")

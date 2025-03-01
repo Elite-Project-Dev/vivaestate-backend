@@ -1,8 +1,8 @@
 from django.db import models
 from django.conf import settings
 from services import LEAD_STATUS_CHOICES
-from client_app.models import Property
-from accounts.models import Audit
+from apps.properties.models import Property
+from apps.accounts.models import Audit
 
 class Lead(Audit):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='leads')

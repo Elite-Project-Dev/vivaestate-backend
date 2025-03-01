@@ -3,6 +3,6 @@ from django.apps import AppConfig
 
 class AccountsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "accounts"
+    name = "apps.accounts"
     def ready(self):
-        import accounts.signals  # Make sure signals are loaded
+        import apps.accounts.signals  # Make sure signals are loaded

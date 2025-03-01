@@ -1,7 +1,7 @@
 import logging
 from celery import shared_task
 from django.utils.timezone import now
-from subscription.models import Subscription, SubscriptionPlan
+from apps.subscription.models import Subscription, SubscriptionPlan
 from datetime import timedelta
 from django.utils import timezone
 logger = logging.getLogger(__name__)

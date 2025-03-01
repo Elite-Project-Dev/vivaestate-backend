@@ -6,7 +6,7 @@ from django.utils.http import urlsafe_base64_decode
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
-from accounts.models import User
+from apps.accounts.models import User
 from .models import AgentProfile
 import phonenumbers
 

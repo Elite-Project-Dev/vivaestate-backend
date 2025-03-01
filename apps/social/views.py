@@ -3,7 +3,7 @@ from rest_framework import status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from properties.models import Property
+from apps.properties.models import Property
 from services import CustomResponseMixin
 
 from .models import Favourite

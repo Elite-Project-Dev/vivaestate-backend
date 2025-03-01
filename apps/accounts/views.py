@@ -16,25 +16,43 @@ from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
-from accounts.models import User
-from accounts.serializers import (AgentSignupSerializer, LoginSerializer,
+from apps.accounts.models import User
+from apps.accounts.serializers import (AgentSignupSerializer, LoginSerializer,
                                   PasswordResetTokenGenerator,
                                   ResendEmailSerializer,
                                   ResetPasswordEmailRequestSerializer,
                                   ResetPasswordSerializer,
                                   SetNewPasswordSerializer, SignupSerializer)
-from accounts.models import AgentProfile
+from apps.accounts.models import AgentProfile
 from services import CustomResponseMixin, EmailService
-                      
+from drf_spectacular.utils import extend_schema, OpenApiExample
 
 logger = logging.getLogger(__file__)
 
 
 class UserSignupView(APIView, CustomResponseMixin):
+    """
+    API endpoint for user registration.
+    
+    Allows new users to sign up by providing necessary details.
+    Sends a verification email after successful registration.
+    """
     permission_classes = [AllowAny]
+    @swagger_auto_schema(
+        operation_description="Register a new user and send a verification email.",
+        request_body=SignupSerializer,
+        responses={
+            201: "Registration initiated. Please check your email.",
+            400: "Invalid data provided.",
+            500: "Failed to send email.",
+        },
+    )
 
     def post(self, request, *args, **kwargs):
+        """  Handle user registration. """
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -60,9 +78,24 @@ class UserSignupView(APIView, CustomResponseMixin):
 
 
 class AgentSignupView(APIView, CustomResponseMixin):
-    permission_classes = [AllowAny]
+    """
+    API endpoint for agent registration.
 
+    Allows real estate agents to sign up by providing necessary details.
+    Stores user data in cache temporarily and sends a verification email.
+    """
+    permission_classes = [AllowAny]
+    @swagger_auto_schema(
+        operation_description="Register a new agent and send a verification email.",
+        request_body=AgentSignupSerializer,
+        responses={
+            201: "Registration initiated. Please check your email.",
+            400: "Invalid data provided.",
+            500: "Failed to send email.",
+        },
+    )
     def post(self, request, *args, **kwargs):
+        """ Handles agent registration. """
         serializer = AgentSignupSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -110,9 +143,26 @@ class VerifiedUserBackend(BaseBackend):
 
 
 class ResendEmailView(CustomResponseMixin, APIView):
+    """
+    API endpoint to resend email verification.
+
+    This view allows users to request a new verification email
+    if they haven't received one or their previous link expired.
+    """
     permission_classes = [AllowAny]
+    @swagger_auto_schema(
+        operation_description="Resend email verification to the user if not yet verified.",
+        request_body=ResendEmailSerializer,
+        responses={
+            201: "Registration initiated. Please check your email.",
+            200: "Account is already verified.",
+            400: "Invalid data provided or user does not exist.",
+            500: "Failed to send email.",
+        },
+    )
 
     def post(self, request, *args, **kwargs):
+        """ Handles email verification resending. """
         serializer = ResendEmailSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data["email"]
@@ -146,9 +196,43 @@ class ResendEmailView(CustomResponseMixin, APIView):
 
 
 class VerifyCodeView(CustomResponseMixin, APIView):
+    """
+    API endpoint for verifying authentication codes.
+
+    This view verifies the OTP sent to the user’s email and activates their account upon successful validation.
+    """
     permission_classes = [AllowAny]
+    @swagger_auto_schema(
+        operation_description="Verify authentication code and activate user account.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["email", "code"],
+            properties={
+                "email": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    format=openapi.FORMAT_EMAIL,
+                    description="User's registered email address."
+                ),
+                "code": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="6-digit authentication code sent to the email."
+                ),
+            },
+        ),
+        responses={
+            201: "Authentication code verified successfully. Your account has been activated.",
+            400: "Invalid data provided (e.g., missing email/code, expired code).",
+            404: "User not found.",
+            500: "Server error during agent profile creation.",
+        },
+    )
 
     def post(self, request, *args, **kwargs):
+        """ Handles authentication code verification.
+
+        **Request Body:**
+        - `email` (string, required) → User's registered email address.
+        - `code` (string, required) → 6-digit verification code. """
         email = request.data.get("email")
         code = request.data.get("code")
 
@@ -213,9 +297,32 @@ class VerifyCodeView(CustomResponseMixin, APIView):
 
 
 class EmailVerifyView(CustomResponseMixin, APIView):
+    """
+    API endpoint to verify a user's email using a signed token.
+    
+    This view confirms email verification and activates the user's account.
+    """
     permission_classes = [AllowAny]
-
+    @swagger_auto_schema(
+        operation_description="Verify user email using the signed token from the email link.",
+        manual_parameters=[
+            openapi.Parameter(
+                "token",
+                openapi.IN_QUERY,
+                description="Signed token sent to the user's email for verification.",
+                type=openapi.TYPE_STRING,
+                required=True,
+            ),
+        ],
+        responses={
+            200: "Email successfully verified. Your account is now active.",
+            400: "Invalid token or user data missing.",
+            404: "User not found.",
+            500: "Error during agent profile creation.",
+        },
+    )
     def get(self, request):
+        """ Verifies the signed token and activates the user account. """
         try:
             token = request.query_params.get("token")
             signer = Signer()
@@ -280,10 +387,25 @@ class EmailVerifyView(CustomResponseMixin, APIView):
 
 
 class RequestPasswordEmail(CustomResponseMixin, generics.GenericAPIView):
+    """
+    API endpoint to request a password reset email.
+
+    **POST**: Send a password reset email to the user if the email exists.
+    """
     permission_classes = [AllowAny]
     serializer_class = ResetPasswordEmailRequestSerializer
-
+    @swagger_auto_schema(
+        summary="Request Password Reset Email",
+        description="Sends a password reset email to the provided email if it exists in the system.",
+        request=ResetPasswordEmailRequestSerializer,
+        responses={
+            201: {"description": "Password reset email sent successfully."},
+            404: {"description": "No user found with this email address."},
+            500: {"description": "Failed to send email. Please try again later."},
+        },
+    )
     def post(self, request):
+        """  Handles password reset email requests. """
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
@@ -318,6 +440,11 @@ class CustomRedirect(HttpResponsePermanentRedirect):
 
 
 class PasswordTokenCheckAPI(CustomResponseMixin, generics.GenericAPIView):
+    """
+    API endpoint to verify password reset token and redirect accordingly.
+    
+    **GET**: Validates the password reset token and returns a redirect URL.
+    """
     permission_classes = [AllowAny]
     serializer_class = SetNewPasswordSerializer
 
@@ -364,8 +491,22 @@ class PasswordTokenCheckAPI(CustomResponseMixin, generics.GenericAPIView):
 
 
 class SetNewPasswordAPIView(CustomResponseMixin, generics.GenericAPIView):
+    """
+    API endpoint to reset a user's password.
+    
+    **PATCH**: Accepts new password and resets it.
+    """
     permission_classes = [AllowAny]
     serializer_class = SetNewPasswordSerializer
+    @extend_schema(
+        summary="Reset Password",
+        description="Allows users to set a new password using a valid reset token.",
+        request=SetNewPasswordSerializer,
+        responses={
+            200: {"description": "Password reset successful."},
+            400: {"description": "Invalid request data."},
+        },)
+  
 
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -376,9 +517,23 @@ class SetNewPasswordAPIView(CustomResponseMixin, generics.GenericAPIView):
 
 
 class ValidateOTPAndResetPassword(CustomResponseMixin, generics.GenericAPIView):
+    """
+    API endpoint to validate an OTP and reset the user's password.
+    
+    **POST**: Validates the OTP and updates the password.
+    """
     permission_classes = [AllowAny]
     serializer_class = ResetPasswordSerializer
-
+    @extend_schema(
+        summary="Validate OTP & Reset Password",
+        description="Validates a One-Time Password (OTP) and allows the user to reset their password.",
+        request=ResetPasswordSerializer,
+        responses={
+            200: {"description": "Password reset successfully."},
+            400: {"description": "Invalid OTP or request data."},
+            404: {"description": "User not found."},
+        },
+    )
     def post(self, request):
         # Extract request data
         email = request.data.get("email", "").strip()
@@ -446,9 +601,68 @@ class ValidateOTPAndResetPassword(CustomResponseMixin, generics.GenericAPIView):
 
 
 class LoginView(CustomResponseMixin, APIView):
+    """
+    API endpoint for user login.
+
+    **POST**: Authenticates a user and returns JWT access & refresh tokens.
+    """
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
-
+    @extend_schema(
+        summary="User Login",
+        description="Authenticates the user and returns an access & refresh token.",
+        request=LoginSerializer,
+        responses={
+            200: {
+                "description": "Login successful",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            "message": "Login successful",
+                            "data": {
+                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR...",
+                                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5...",
+                            },
+                        }
+                    }
+                },
+            },
+            400: {
+                "description": "Invalid credentials or missing fields",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            "message": "Invalid data provided",
+                            "data": {
+                                "email": ["This field is required."],
+                                "password": ["This field is required."],
+                            },
+                        }
+                    }
+                },
+            },
+        },
+        examples=[
+            OpenApiExample(
+                "Successful Login",
+                value={
+                    "message": "Login successful",
+                    "data": {
+                        "accessToken": "eyJhbGciOiJIUzI1NiIsInR...",
+                        "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5...",
+                    },
+                },
+                request_only=False,
+                response_only=True,
+            ),
+            OpenApiExample(
+                "Invalid Credentials",
+                value={"message": "Invalid email or password"},
+                request_only=False,
+                response_only=True,
+            ),
+        ],
+    )
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
