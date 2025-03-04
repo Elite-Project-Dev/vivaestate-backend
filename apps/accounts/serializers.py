@@ -7,8 +7,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
 from apps.accounts.models import User
-from .models import AgentProfile
 import phonenumbers
+from django.db.models import Q
 
 class SignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
@@ -24,22 +24,12 @@ class SignupSerializer(serializers.ModelSerializer):
         username = attrs.get("username")
         email = attrs.get("email")
         whatsapp_number = attrs.get("whatsapp_number")
-        existing_user = User.objects.filter(username=username).first()
-
+        existing_user = User.objects.filter(Q(username=username) | Q(email=email)).first()
+        
         if existing_user:
-            if not existing_user.is_active:
-                existing_user.delete()
-            else:
-                raise serializers.ValidationError(
-                    "A user with this username already exists and is active."
-                )
-        existing_user_by_email = User.objects.filter(email=email).first()
-        if existing_user_by_email and not existing_user_by_email.is_active:
-            existing_user_by_email.delete()
-        elif existing_user_by_email:
-            raise serializers.ValidationError(
-                "A user with this email already exists and is active."
-            )
+            if existing_user.is_active:
+                raise serializers.ValidationError("A user with this email or username already exists and is active.")
+            existing_user.delete() 
         try:
             parsed_number = phonenumbers.parse(whatsapp_number, None)  # Auto-detect country
             if not phonenumbers.is_valid_number(parsed_number):
@@ -70,10 +60,10 @@ class AgentSignupSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     agency_name = serializers.CharField(required=True, max_length=255)
-    whatsapp_number = serializers.CharField()
+    whatsapp_number = serializers.CharField(required=True)
 
     class Meta:
-        model = AgentProfile  # Link to the actual model that this serializer represents
+        model = User # Link to the actual model that this serializer represents
         fields = [
             "email",
             "username",
@@ -87,36 +77,23 @@ class AgentSignupSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         username = attrs.get("username")
         email = attrs.get("email")
-        existing_user = User.objects.filter(username=username).first()
+        whatsapp_number = attrs.get("whatsapp_number")
+        
+        existing_user = User.objects.filter(Q(username=username) | Q(email=email)).first()
 
         if existing_user:
-            if not existing_user.is_active:
-                existing_user.delete()
-            else:
-                raise serializers.ValidationError(
-                    "A user with this username already exists and is active."
-                )
-        existing_user_by_email = User.objects.filter(email=email).first()
-        if existing_user_by_email and not existing_user_by_email.is_active:
-            existing_user_by_email.delete()
-        elif existing_user_by_email:
-            raise serializers.ValidationError(
-                "A user with this email already exists and is active."
-            )
+            if existing_user.is_active:
+                raise serializers.ValidationError("A user with this email or username already exists and is active.")
+            existing_user.delete()  # Only delete inactive users
+        try:
+            parsed_number = phonenumbers.parse(whatsapp_number, None)  # Auto-detect country
+            if not phonenumbers.is_valid_number(parsed_number):
+                raise serializers.ValidationError({"whatsapp_number": "Invalid phone number."})
+        except phonenumbers.NumberParseException:
+            raise serializers.ValidationError({"whatsapp_number": "Invalid phone number format."})
 
         return attrs
 
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            email=validated_data["email"],
-            username=validated_data["username"],
-            password=validated_data["password"],
-            first_name=validated_data["first_name"],
-            last_name=validated_data["last_name"],
-            is_active=False,
-            is_agent=True,
-        )
-        return user
 
 
 class ResetPasswordEmailRequestSerializer(serializers.Serializer):

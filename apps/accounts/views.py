@@ -39,7 +39,6 @@ class UserSignupView(APIView, CustomResponseMixin):
     """
     serializer_class = SignupSerializer
     permission_classes = [AllowAny]
-    parser_classes = [parsers.JSONParser]
     @extend_schema(
         summary="User Signup",
         description="Register a new user and send a verification email.",
@@ -60,6 +59,10 @@ class UserSignupView(APIView, CustomResponseMixin):
             serializer.save()
             user_data = serializer.validated_data
             email = user_data["email"]
+            cache.set(
+                f"user_data_{email}",
+                timeout=3600,
+            )  # Cache expires in 1 hour
             try:
                 email_service = EmailService()
                 email_service.send_signup_verification_email(request, user_data)
@@ -120,16 +123,8 @@ class AgentSignupView(APIView, CustomResponseMixin):
             serializer.save()
             user_data = serializer.validated_data
             email = user_data["email"]
-            agency_name = user_data["agency_name"]
-            contact_info = user_data["contact_info"]
-
             cache.set(
                 f"user_data_{email}",
-                {
-                    "email": email,
-                    "agency_name": agency_name,
-                    "contact_info": contact_info,
-                },
                 timeout=3600,
             )  # Cache expires in 1 hour
             try:
@@ -268,31 +263,28 @@ class VerifyCodeView(CustomResponseMixin, APIView):
                 message="User data is missing or expired.",
             )
 
-        User = get_user_model()
-        user = User.objects.filter(email=email).first()
-
-        if not user:
-            return self.custom_response(
-                status=status.HTTP_404_NOT_FOUND, message="user not found."
+        try:
+            user = User.objects.create_user(
+                email=user_data["email"],
+                username=user_data.get("username", user_data["email"]),
+                first_name=user_data.get("first_name", ""),
+                last_name=user_data.get("last_name", ""),
+                whatsapp_number=user_data.get("whatsapp_number", ""),
+                is_active=True,  # Now activating the user
+                is_agent=user_data.get("is_agent", False),
+                password=user_data.get("password"),  # Ensure the password is hashed
             )
-
-        user.is_active = True
-        user.save()
-        if user.is_agent:
-            agency_name = user_data.get("agency_name")
-            contact_info = user_data.get("contact_info")
-            try:
+            if user.is_agent:
                 AgentProfile.objects.create(
                     user=user,
-                    agency_name=agency_name,
-                    contact_info=contact_info,
+                    agency_name=user_data.get("agency_name", ""),
                 )
-            except Exception as e:
-                user.delete()
-                return self.custom_response(
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    message=f"Error during creation: {str(e)}",
-                )
+        except Exception as e:
+            return self.custom_response(
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message=f"Error during user creation: {str(e)}",
+            )
+        
         cache.delete(f"auth_code_{email}")
         cache.delete(f"user_data_{email}")
         return self.custom_response(
@@ -333,15 +325,6 @@ class EmailVerifyView(CustomResponseMixin, APIView):
             signer = Signer()
             email = signer.unsign(token)
 
-            user = get_user_model().objects.get(email=email)
-            if user.is_active:
-                return self.custom_response(
-                    status=status.HTTP_400_BAD_REQUEST,
-                    message="This account is already verified.",
-                )
-
-            user.is_active = True
-            user.save()
             user_data = cache.get(f"user_data_{email}")
 
             if not user_data:
@@ -349,6 +332,30 @@ class EmailVerifyView(CustomResponseMixin, APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                     message="User data is missing or expired.",
                 )
+            try:
+                user = User.objects.create_user(
+                    email=user_data["email"],
+                    username=user_data.get("username", user_data["email"]),
+                    first_name=user_data.get("first_name", ""),
+                    last_name=user_data.get("last_name", ""),
+                    whatsapp_number=user_data.get("whatsapp_number", ""),
+                    is_active=True,  # Now activating the user
+                    is_agent=user_data.get("is_agent", False),
+                    password=user_data.get("password"),  # Ensure the password is hashed
+                )
+                if user.is_agent:
+                    AgentProfile.objects.create(
+                        user=user,
+                        agency_name=user_data.get("agency_name", ""),
+                    )
+            except Exception as e:
+                return self.custom_response(
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    message=f"Error during user creation: {str(e)}",
+                )
+        
+            cache.delete(f"auth_code_{email}")
+            cache.delete(f"user_data_{email}")
             agency_name = user_data.get("agency_name")
             contact_info = user_data.get("contact_info")
 

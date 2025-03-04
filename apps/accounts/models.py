@@ -49,7 +49,6 @@ class UserRole(Audit):
 class AgentProfile(Audit):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     agency_name = models.CharField(max_length=255, unique=True)
-    contact_info = models.TextField()
     bio = models.TextField(blank=True)
     license_number = models.CharField(max_length=50, blank=True)
     address = models.CharField(max_length=255, blank=True)
