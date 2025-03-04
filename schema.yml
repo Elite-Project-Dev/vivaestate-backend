@@ -1,0 +1,1887 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /accounts/agent/signup/:
+    post:
+      operationId: accounts_agent_signup_create
+      description: Register a new agent and send a verification email.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentSignup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AgentSignup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AgentSignup'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDataResponse'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+  /accounts/email-verify/:
+    get:
+      operationId: accounts_email_verify_retrieve
+      description: Verify user email using the signed token from the email link.
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDataResponse'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+  /accounts/login/:
+    post:
+      operationId: accounts_login_create
+      description: Authenticates the user and returns an access & refresh token.
+      summary: User Login
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                SuccessfulLogin:
+                  value:
+                    message: Login successful
+                    data:
+                      accessToken: eyJhbGciOiJIUzI1NiIsInR...
+                      refreshToken: eyJhbGciOiJIUzI1NiIsInR5...
+                  summary: Successful Login
+                InvalidCredentials:
+                  value:
+                    message: Invalid email or password
+                  summary: Invalid Credentials
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+  /accounts/password-reset-confirm/{uidb64}/{token}/:
+    get:
+      operationId: accounts_password_reset_confirm_retrieve
+      description: |-
+        API endpoint to verify password reset token and redirect accordingly.
+
+        **GET**: Validates the password reset token and returns a redirect URL.
+      summary: Check Password Reset Token
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        description: Password reset token
+        required: true
+      - in: path
+        name: uidb64
+        schema:
+          type: string
+        description: Base64 encoded user ID
+        required: true
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Token is valid.
+  /accounts/password-reset/{uidb64}/{token}/:
+    get:
+      operationId: accounts_password_reset_retrieve
+      description: |-
+        API endpoint to verify password reset token and redirect accordingly.
+
+        **GET**: Validates the password reset token and returns a redirect URL.
+      summary: Check Password Reset Token
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        description: Password reset token
+        required: true
+      - in: path
+        name: uidb64
+        schema:
+          type: string
+        description: Base64 encoded user ID
+        required: true
+      tags:
+      - accounts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Token is valid.
+  /accounts/resend-auth-code/:
+    post:
+      operationId: accounts_resend_auth_code_create
+      description: Resend email verification to the user if not yet verified.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendEmail'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResendEmail'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResendEmail'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDataResponse'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+  /accounts/user/signup/:
+    post:
+      operationId: accounts_user_signup_create
+      description: Register a new user and send a verification email.
+      summary: User Signup
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Signup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Signup'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Signup'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDataResponse'
+          description: ''
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+  /accounts/verify-code/:
+    post:
+      operationId: accounts_verify_code_create
+      description: |-
+        Handles authentication code verification.
+
+        **Request Body:**
+        - `email` (string, required) → User's registered email address.
+        - `code` (string, required) → 6-digit verification code.
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyCode'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Authentication code verified successfully. Your account has
+            been activated.
+        '400':
+          description: Invalid data provided (e.g., missing email/code, expired code).
+        '404':
+          description: User not found.
+        '500':
+          description: Server error during verification.
+  /leads/leads/:
+    get:
+      operationId: leads_leads_list
+      description: API endpoint for managing leads.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - leads
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLeadList'
+          description: ''
+    post:
+      operationId: leads_leads_create
+      description: API endpoint for managing leads.
+      tags:
+      - leads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lead'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Lead'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Lead'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+          description: ''
+  /leads/leads/{id}/:
+    get:
+      operationId: leads_leads_retrieve
+      description: API endpoint for managing leads.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this lead.
+        required: true
+      tags:
+      - leads
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+          description: ''
+    put:
+      operationId: leads_leads_update
+      description: API endpoint for managing leads.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this lead.
+        required: true
+      tags:
+      - leads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Lead'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Lead'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Lead'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+          description: ''
+    patch:
+      operationId: leads_leads_partial_update
+      description: API endpoint for managing leads.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this lead.
+        required: true
+      tags:
+      - leads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedLead'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedLead'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedLead'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+          description: ''
+    delete:
+      operationId: leads_leads_destroy
+      description: API endpoint for managing leads.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this lead.
+        required: true
+      tags:
+      - leads
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /property/api/properties/{id}/update-location/:
+    put:
+      operationId: property_api_properties_update_location_update
+      description: Handles updating property location.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: property_api_properties_update_location_partial_update
+      description: Updates the latitude and longitude of a property.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /property/properties/affordable/:
+    get:
+      operationId: property_properties_affordable_list
+      description: Retrieve a list of properties
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPropertyList'
+          description: ''
+  /property/properties/commercial/:
+    get:
+      operationId: property_properties_commercial_list
+      description: Retrieve a list of properties
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPropertyList'
+          description: ''
+  /property/properties/for-sale/:
+    get:
+      operationId: property_properties_for_sale_list
+      description: Retrieve a list of properties
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPropertyList'
+          description: ''
+  /property/properties/luxury/:
+    get:
+      operationId: property_properties_luxury_list
+      description: Retrieve a list of properties
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPropertyList'
+          description: ''
+  /property/properties/rentals/:
+    get:
+      operationId: property_properties_rentals_list
+      description: Retrieve a list of properties
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPropertyList'
+          description: ''
+  /property/property/:
+    get:
+      operationId: property_property_list
+      description: Retrieve a list of properties
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPropertyList'
+          description: ''
+    post:
+      operationId: property_property_create
+      description: Create a new property
+      tags:
+      - property
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Property'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Property'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Property'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+          description: ''
+  /property/property/{id}/:
+    get:
+      operationId: property_property_retrieve
+      description: Retrieve a single property
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this property.
+        required: true
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+          description: ''
+    put:
+      operationId: property_property_update
+      description: Update an existing property
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this property.
+        required: true
+      tags:
+      - property
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Property'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Property'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Property'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+          description: ''
+    patch:
+      operationId: property_property_partial_update
+      description: ViewSet for managing property listings
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this property.
+        required: true
+      tags:
+      - property
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProperty'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProperty'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProperty'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Property'
+          description: ''
+    delete:
+      operationId: property_property_destroy
+      description: Delete a property
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this property.
+        required: true
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /property/property/nearby/:
+    get:
+      operationId: property_property_nearby_list
+      description: Find properties within a given radius based on latitude and longitude
+      parameters:
+      - in: query
+        name: lat
+        schema:
+          type: number
+          format: double
+        description: Latitude of the location
+      - in: query
+        name: lng
+        schema:
+          type: number
+          format: double
+        description: Longitude of the location
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: radius
+        schema:
+          type: number
+          format: double
+          default: 10
+        description: Search radius in km
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPropertyList'
+          description: ''
+  /property/property/new_listings/:
+    get:
+      operationId: property_property_new_listings_list
+      description: Retrieve properties listed in the last 7 days
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - property
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPropertyList'
+          description: ''
+  /social/favourite-property/{property_id}/:
+    get:
+      operationId: social_favourite_property_retrieve
+      parameters:
+      - in: path
+        name: property_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - social
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: social_favourite_property_create
+      parameters:
+      - in: path
+        name: property_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - social
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: social_favourite_property_destroy
+      parameters:
+      - in: path
+        name: property_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - social
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /subscription/subscription-plans/:
+    get:
+      operationId: subscription_subscription_plans_list
+      description: API endpoint for managing subscription plans.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - subscription
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubscriptionPlanList'
+          description: ''
+    post:
+      operationId: subscription_subscription_plans_create
+      description: API endpoint for managing subscription plans.
+      tags:
+      - subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionPlan'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubscriptionPlan'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubscriptionPlan'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionPlan'
+          description: ''
+  /subscription/subscription-plans/{id}/:
+    get:
+      operationId: subscription_subscription_plans_retrieve
+      description: API endpoint for managing subscription plans.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription plan.
+        required: true
+      tags:
+      - subscription
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionPlan'
+          description: ''
+    put:
+      operationId: subscription_subscription_plans_update
+      description: API endpoint for managing subscription plans.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription plan.
+        required: true
+      tags:
+      - subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionPlan'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubscriptionPlan'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubscriptionPlan'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionPlan'
+          description: ''
+    patch:
+      operationId: subscription_subscription_plans_partial_update
+      description: API endpoint for managing subscription plans.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription plan.
+        required: true
+      tags:
+      - subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriptionPlan'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriptionPlan'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriptionPlan'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionPlan'
+          description: ''
+    delete:
+      operationId: subscription_subscription_plans_destroy
+      description: API endpoint for managing subscription plans.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription plan.
+        required: true
+      tags:
+      - subscription
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /subscription/subscriptions/:
+    get:
+      operationId: subscription_subscriptions_list
+      description: API endpoint for managing subscriptions.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - subscription
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubscriptionList'
+          description: ''
+    post:
+      operationId: subscription_subscriptions_create
+      description: API endpoint for managing subscriptions.
+      tags:
+      - subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /subscription/subscriptions/{id}/:
+    get:
+      operationId: subscription_subscriptions_retrieve
+      description: API endpoint for managing subscriptions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription.
+        required: true
+      tags:
+      - subscription
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+    put:
+      operationId: subscription_subscriptions_update
+      description: API endpoint for managing subscriptions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription.
+        required: true
+      tags:
+      - subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+    patch:
+      operationId: subscription_subscriptions_partial_update
+      description: API endpoint for managing subscriptions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription.
+        required: true
+      tags:
+      - subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscription'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+    delete:
+      operationId: subscription_subscriptions_destroy
+      description: API endpoint for managing subscriptions.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this subscription.
+        required: true
+      tags:
+      - subscription
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /subscription/subscriptions/initiate_payment/:
+    post:
+      operationId: subscription_subscriptions_initiate_payment_create
+      description: Initiates a subscription payment with Flutterwave.
+      tags:
+      - subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+components:
+  schemas:
+    AgentSignup:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+        first_name:
+          type: string
+        last_name:
+          type: string
+        agency_name:
+          type: string
+          maxLength: 255
+        whatsapp_number:
+          type: string
+      required:
+      - agency_name
+      - email
+      - first_name
+      - last_name
+      - password
+      - username
+      - whatsapp_number
+    CreateResponse:
+      type: object
+      description: Response for successfully created resources.
+      properties:
+        status:
+          type: string
+          default: created
+        message:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: {}
+      required:
+      - message
+    Document:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        property:
+          type: integer
+        document_type:
+          $ref: '#/components/schemas/DocumentTypeEnum'
+        file:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - document_type
+      - id
+      - property
+    DocumentTypeEnum:
+      enum:
+      - c_of_o
+      - title_deed
+      - warranty_deed
+      - grant_deed
+      type: string
+      description: |-
+        * `c_of_o` - Certificate of Occupancy
+        * `title_deed` - Title Deed
+        * `warranty_deed` - Warranty Deed
+        * `grant_deed` - Grant Deed
+    ErrorDataResponse:
+      type: object
+      description: Error response with additional data field.
+      properties:
+        status:
+          type: string
+          default: failure
+        message:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: {}
+        data:
+          type: object
+          additionalProperties: {}
+      required:
+      - data
+      - message
+    ErrorResponse:
+      type: object
+      description: Base error response serializer.
+      properties:
+        status:
+          type: string
+          default: failure
+        message:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: {}
+      required:
+      - message
+    IntervalEnum:
+      enum:
+      - monthly
+      - yearly
+      type: string
+      description: |-
+        * `monthly` - Monthly
+        * `yearly` - Yearly
+    Lead:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        property:
+          type: integer
+        buyer:
+          type: integer
+          nullable: true
+        message:
+          type: string
+        assigned_agent:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          $ref: '#/components/schemas/LeadStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        last_updated:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - assigned_agent
+      - created_at
+      - id
+      - last_updated
+      - message
+      - property
+    LeadStatusEnum:
+      enum:
+      - new
+      - contacted
+      - follow_up
+      - closed
+      type: string
+      description: |-
+        * `new` - New
+        * `contacted` - Contacted
+        * `follow_up` - Follow Up
+        * `closed` - Closed
+    Login:
+      type: object
+      properties:
+        email_or_username:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - email_or_username
+      - password
+    NotFoundResponse:
+      type: object
+      description: Response for 404 Not Found errors.
+      properties:
+        status:
+          type: string
+          default: not_found
+        message:
+          type: string
+          default: The requested resource was not found.
+        metadata:
+          type: object
+          additionalProperties: {}
+    PaginatedLeadList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lead'
+    PaginatedPropertyList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+    PaginatedSubscriptionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+    PaginatedSubscriptionPlanList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionPlan'
+    PatchedLead:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        property:
+          type: integer
+        buyer:
+          type: integer
+          nullable: true
+        message:
+          type: string
+        assigned_agent:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          $ref: '#/components/schemas/LeadStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        last_updated:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedProperty:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        description:
+          type: string
+          nullable: true
+        property_type:
+          $ref: '#/components/schemas/PropertyTypeEnum'
+        bedrooms:
+          type: string
+        bathrooms:
+          type: string
+        square_feet:
+          type: string
+        status:
+          $ref: '#/components/schemas/PropertyStatusEnum'
+        image:
+          type: string
+          format: uri
+        video:
+          type: string
+          format: uri
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        for_sale:
+          type: boolean
+        for_rent:
+          type: boolean
+        latitude:
+          type: number
+          format: double
+          writeOnly: true
+        longitude:
+          type: number
+          format: double
+          writeOnly: true
+        location:
+          type: string
+          readOnly: true
+    PatchedSubscription:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        plan:
+          type: integer
+        flutterwave_subscription_id:
+          type: string
+          readOnly: true
+        status:
+          type: string
+          readOnly: true
+        start_date:
+          type: string
+          format: date-time
+          readOnly: true
+        end_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+    PatchedSubscriptionPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        interval:
+          $ref: '#/components/schemas/IntervalEnum'
+        duration:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        flutterwave_plan_id:
+          type: string
+          readOnly: true
+          nullable: true
+    Property:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        description:
+          type: string
+          nullable: true
+        property_type:
+          $ref: '#/components/schemas/PropertyTypeEnum'
+        bedrooms:
+          type: string
+        bathrooms:
+          type: string
+        square_feet:
+          type: string
+        status:
+          $ref: '#/components/schemas/PropertyStatusEnum'
+        image:
+          type: string
+          format: uri
+        video:
+          type: string
+          format: uri
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        for_sale:
+          type: boolean
+        for_rent:
+          type: boolean
+        latitude:
+          type: number
+          format: double
+          writeOnly: true
+        longitude:
+          type: number
+          format: double
+          writeOnly: true
+        location:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - location
+      - price
+      - property_type
+      - title
+    PropertyStatusEnum:
+      enum:
+      - available
+      - sold
+      - under_negotiation
+      type: string
+      description: |-
+        * `available` - Available
+        * `sold` - Sold
+        * `under_negotiation` - Under Negotiation
+    PropertyTypeEnum:
+      enum:
+      - house
+      - apartment
+      - land
+      - duplex
+      - commercial
+      - villa
+      - townhouse
+      - bungalow
+      - mansion
+      - penthouse
+      - studio
+      - flat
+      - office_space
+      - warehouse
+      - factory
+      - plot
+      - shop
+      - retail
+      - hotel
+      - restaurant
+      - farm
+      - resort
+      - mixed_use
+      - multi_family
+      - hostel
+      - luxury
+      - serviced_apartment
+      - beach_house
+      - cottage
+      - vacation_home
+      - co_working_space
+      type: string
+      description: |-
+        * `house` - House
+        * `apartment` - Apartment
+        * `land` - Land
+        * `duplex` - Duplex
+        * `commercial` - Commercial
+        * `villa` - Villa
+        * `townhouse` - Townhouse
+        * `bungalow` - Bungalow
+        * `mansion` - Mansion
+        * `penthouse` - Penthouse
+        * `studio` - Studio Apartment
+        * `flat` - Flat
+        * `office_space` - Office Space
+        * `warehouse` - Warehouse
+        * `factory` - Factory
+        * `plot` - Plot
+        * `shop` - Shop
+        * `retail` - Retail Space
+        * `hotel` - Hotel
+        * `restaurant` - Restaurant
+        * `farm` - Farm Land
+        * `resort` - Resort
+        * `mixed_use` - Mixed-Use Property
+        * `multi_family` - Multi-family Building
+        * `hostel` - Hostel
+        * `luxury` - Luxury Property
+        * `serviced_apartment` - Serviced Apartment
+        * `beach_house` - Beach House
+        * `cottage` - Cottage
+        * `vacation_home` - Vacation Home
+        * `co_working_space` - Co-working Space
+    ResendEmail:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    Signup:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+        first_name:
+          type: string
+        last_name:
+          type: string
+        whatsapp_number:
+          type: string
+      required:
+      - email
+      - first_name
+      - last_name
+      - password
+      - username
+      - whatsapp_number
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        plan:
+          type: integer
+        flutterwave_subscription_id:
+          type: string
+          readOnly: true
+        status:
+          type: string
+          readOnly: true
+        start_date:
+          type: string
+          format: date-time
+          readOnly: true
+        end_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - end_date
+      - flutterwave_subscription_id
+      - id
+      - plan
+      - start_date
+      - status
+      - user
+    SubscriptionPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        interval:
+          $ref: '#/components/schemas/IntervalEnum'
+        duration:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        flutterwave_plan_id:
+          type: string
+          readOnly: true
+          nullable: true
+      required:
+      - amount
+      - duration
+      - flutterwave_plan_id
+      - id
+      - interval
+      - name
+    SuccessResponse:
+      type: object
+      description: Standard success response serializer.
+      properties:
+        status:
+          type: string
+          default: success
+        message:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: {}
+      required:
+      - message
+    VerifyCode:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        code:
+          type: string
+          maxLength: 6
+      required:
+      - code
+      - email
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

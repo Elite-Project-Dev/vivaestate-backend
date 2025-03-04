@@ -31,3 +31,8 @@ class PropertySerializer(serializers.ModelSerializer):
     
     def get_location(self, obj):
         return {"latitude": obj.latitude, "longitude": obj.longitude}
+
+class UpdateLocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Property
+        fields = ['latitude', 'longitude']

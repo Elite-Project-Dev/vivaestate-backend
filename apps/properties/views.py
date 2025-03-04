@@ -18,12 +18,13 @@ from services import CustomResponseMixin
 from apps.accounts.permission import  IsAgent, HasActiveSubscription
 from .models import Property
 from .serializers import PropertySerializer
+from rest_framework import generics
+from .serializers import UpdateLocationSerializer
 
-
-### 🔹 Update Location API View
-class UpdateLocationView(APIView):
+class UpdateLocationView(generics.UpdateAPIView):
     """ Updates the latitude and longitude of a property. """
 
+    serializer_class = UpdateLocationSerializer 
     permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]
 
     @swagger_auto_schema(
@@ -60,7 +61,6 @@ class UpdateLocationView(APIView):
         property.save()
 
         return Response({"message": "Location updated successfully"}, status=status.HTTP_200_OK)
-
 
 class CustomResponseModelViewSet(CustomResponseMixin, viewsets.ModelViewSet):
     """ Custom response formatting for ViewSets """
@@ -110,7 +110,8 @@ class PropertyViewSet(CustomResponseModelViewSet):
 
     @extend_schema(
         description="Retrieve properties listed in the last 7 days",
-        responses={200: PropertySerializer(many=True)}
+        responses={200: PropertySerializer(many=True)},
+        request=PropertySerializer
     )
     @action(detail=False, methods=['get'])
     def new_listings(self, request):

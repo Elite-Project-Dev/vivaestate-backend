@@ -1,22 +1,19 @@
 import logging
 import os
-import re
-from datetime import date, timedelta
-
 from django.conf import settings
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import  get_user_model
 from django.contrib.auth.backends import BaseBackend
 from django.core.cache import cache
+from rest_framework import parsers
 from django.core.signing import BadSignature, Signer
 from django.http import HttpResponsePermanentRedirect
 from django.utils.encoding import DjangoUnicodeDecodeError, smart_str
 from django.utils.http import urlsafe_base64_decode
-from django_tenants.utils import schema_context
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse, OpenApiTypes
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from apps.accounts.models import User
@@ -25,14 +22,14 @@ from apps.accounts.serializers import (AgentSignupSerializer, LoginSerializer,
                                   ResendEmailSerializer,
                                   ResetPasswordEmailRequestSerializer,
                                   ResetPasswordSerializer,
-                                  SetNewPasswordSerializer, SignupSerializer)
+                                  SetNewPasswordSerializer, SignupSerializer, VerifyCodeSerializer)
 from apps.accounts.models import AgentProfile
-from services import CustomResponseMixin, EmailService
+from services import CustomResponseMixin, EmailService, SuccessResponseSerializer, ErrorDataResponseSerializer, ErrorResponseSerializer,CreateResponseSerializer, NotFoundResponseSerializer
 from drf_spectacular.utils import extend_schema, OpenApiExample
 
 logger = logging.getLogger(__file__)
 
-
+tags = ["auth"]
 class UserSignupView(APIView, CustomResponseMixin):
     """
     API endpoint for user registration.
@@ -40,15 +37,20 @@ class UserSignupView(APIView, CustomResponseMixin):
     Allows new users to sign up by providing necessary details.
     Sends a verification email after successful registration.
     """
+    serializer_class = SignupSerializer
     permission_classes = [AllowAny]
-    @swagger_auto_schema(
-        operation_description="Register a new user and send a verification email.",
-        request_body=SignupSerializer,
+    parser_classes = [parsers.JSONParser]
+    @extend_schema(
+        summary="User Signup",
+        description="Register a new user and send a verification email.",
+        tags=tags,
         responses={
-            201: "Registration initiated. Please check your email.",
-            400: "Invalid data provided.",
-            500: "Failed to send email.",
+            201: CreateResponseSerializer,
+            400: ErrorDataResponseSerializer,
+            500: ErrorResponseSerializer,
         },
+        auth=[],
+       
     )
 
     def post(self, request, *args, **kwargs):
@@ -85,14 +87,31 @@ class AgentSignupView(APIView, CustomResponseMixin):
     Stores user data in cache temporarily and sends a verification email.
     """
     permission_classes = [AllowAny]
-    @swagger_auto_schema(
-        operation_description="Register a new agent and send a verification email.",
-        request_body=AgentSignupSerializer,
+    @extend_schema(
+        description="Register a new agent and send a verification email.",
+        request=AgentSignupSerializer,
         responses={
-            201: "Registration initiated. Please check your email.",
-            400: "Invalid data provided.",
-            500: "Failed to send email.",
+            201: CreateResponseSerializer,
+            400: ErrorDataResponseSerializer,
+            500: ErrorResponseSerializer,
         },
+        examples=[
+        OpenApiExample(
+            'Example Request',
+            summary='Example agent signup payload',
+            description='A sample request payload for agent signup.',
+            value={
+                "email": "agent@example.com",
+                "username": "agent123",
+                "password": "securepassword",
+                "first_name": "John",
+                "last_name": "Doe",
+                "agency_name": "Doe Realty",
+                "whatsapp_number": "+2348123456789",
+            },
+            request_only=True,
+        )
+    ]
     )
     def post(self, request, *args, **kwargs):
         """ Handles agent registration. """
@@ -150,14 +169,14 @@ class ResendEmailView(CustomResponseMixin, APIView):
     if they haven't received one or their previous link expired.
     """
     permission_classes = [AllowAny]
-    @swagger_auto_schema(
-        operation_description="Resend email verification to the user if not yet verified.",
-        request_body=ResendEmailSerializer,
+    @extend_schema(
+        description="Resend email verification to the user if not yet verified.",
+        request=ResendEmailSerializer,
         responses={
-            201: "Registration initiated. Please check your email.",
-            200: "Account is already verified.",
-            400: "Invalid data provided or user does not exist.",
-            500: "Failed to send email.",
+            201: CreateResponseSerializer,
+            200: SuccessResponseSerializer,
+            400: ErrorDataResponseSerializer,
+            500: ErrorResponseSerializer,
         },
     )
 
@@ -202,30 +221,16 @@ class VerifyCodeView(CustomResponseMixin, APIView):
     This view verifies the OTP sent to the user’s email and activates their account upon successful validation.
     """
     permission_classes = [AllowAny]
-    @swagger_auto_schema(
-        operation_description="Verify authentication code and activate user account.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["email", "code"],
-            properties={
-                "email": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    format=openapi.FORMAT_EMAIL,
-                    description="User's registered email address."
-                ),
-                "code": openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="6-digit authentication code sent to the email."
-                ),
-            },
-        ),
-        responses={
-            201: "Authentication code verified successfully. Your account has been activated.",
-            400: "Invalid data provided (e.g., missing email/code, expired code).",
-            404: "User not found.",
-            500: "Server error during agent profile creation.",
-        },
-    )
+    @extend_schema(
+    request=VerifyCodeSerializer,  # 👈 Defines expected request body
+    responses={
+        200: OpenApiResponse(description="Authentication code verified successfully. Your account has been activated."),
+        400: OpenApiResponse(description="Invalid data provided (e.g., missing email/code, expired code)."),
+        404: OpenApiResponse(description="User not found."),
+        500: OpenApiResponse(description="Server error during verification."),
+    }
+)
+
 
     def post(self, request, *args, **kwargs):
         """ Handles authentication code verification.
@@ -303,22 +308,22 @@ class EmailVerifyView(CustomResponseMixin, APIView):
     This view confirms email verification and activates the user's account.
     """
     permission_classes = [AllowAny]
-    @swagger_auto_schema(
-        operation_description="Verify user email using the signed token from the email link.",
-        manual_parameters=[
+    @extend_schema(
+        description="Verify user email using the signed token from the email link.",
+        parameters=[
             openapi.Parameter(
-                "token",
-                openapi.IN_QUERY,
+                name="token",
+                type=OpenApiTypes.STR,
+                in_="query",
                 description="Signed token sent to the user's email for verification.",
-                type=openapi.TYPE_STRING,
                 required=True,
             ),
         ],
         responses={
-            200: "Email successfully verified. Your account is now active.",
-            400: "Invalid token or user data missing.",
-            404: "User not found.",
-            500: "Error during agent profile creation.",
+            200: SuccessResponseSerializer,
+            400: ErrorDataResponseSerializer,
+            404: NotFoundResponseSerializer,
+            500: ErrorResponseSerializer, 
         },
     )
     def get(self, request):
@@ -394,14 +399,14 @@ class RequestPasswordEmail(CustomResponseMixin, generics.GenericAPIView):
     """
     permission_classes = [AllowAny]
     serializer_class = ResetPasswordEmailRequestSerializer
-    @swagger_auto_schema(
+    @extend_schema(
         summary="Request Password Reset Email",
         description="Sends a password reset email to the provided email if it exists in the system.",
         request=ResetPasswordEmailRequestSerializer,
         responses={
-            201: {"description": "Password reset email sent successfully."},
-            404: {"description": "No user found with this email address."},
-            500: {"description": "Failed to send email. Please try again later."},
+            201: CreateResponseSerializer,
+            404: NotFoundResponseSerializer,
+            500: ErrorResponseSerializer,
         },
     )
     def post(self, request):
@@ -447,6 +452,14 @@ class PasswordTokenCheckAPI(CustomResponseMixin, generics.GenericAPIView):
     """
     permission_classes = [AllowAny]
     serializer_class = SetNewPasswordSerializer
+    @extend_schema(
+        summary="Check Password Reset Token",
+        parameters=[
+            OpenApiParameter(name="uidb64", type=OpenApiTypes.STR, location=OpenApiParameter.PATH, description="Base64 encoded user ID"),
+            OpenApiParameter(name="token", type=OpenApiTypes.STR, location=OpenApiParameter.PATH, description="Password reset token"),
+        ],
+        responses={200: OpenApiResponse(description="Token is valid.")},
+    )
 
     def get(self, request, uidb64, token):
         # Use localhost as the default redirect URL during development
@@ -503,8 +516,8 @@ class SetNewPasswordAPIView(CustomResponseMixin, generics.GenericAPIView):
         description="Allows users to set a new password using a valid reset token.",
         request=SetNewPasswordSerializer,
         responses={
-            200: {"description": "Password reset successful."},
-            400: {"description": "Invalid request data."},
+            200: SuccessResponseSerializer,
+            400: ErrorResponseSerializer,
         },)
   
 
@@ -529,9 +542,9 @@ class ValidateOTPAndResetPassword(CustomResponseMixin, generics.GenericAPIView):
         description="Validates a One-Time Password (OTP) and allows the user to reset their password.",
         request=ResetPasswordSerializer,
         responses={
-            200: {"description": "Password reset successfully."},
-            400: {"description": "Invalid OTP or request data."},
-            404: {"description": "User not found."},
+            200:SuccessResponseSerializer,
+            400: ErrorDataResponseSerializer,
+            404: NotFoundResponseSerializer,
         },
     )
     def post(self, request):
@@ -613,35 +626,8 @@ class LoginView(CustomResponseMixin, APIView):
         description="Authenticates the user and returns an access & refresh token.",
         request=LoginSerializer,
         responses={
-            200: {
-                "description": "Login successful",
-                "content": {
-                    "application/json": {
-                        "example": {
-                            "message": "Login successful",
-                            "data": {
-                                "accessToken": "eyJhbGciOiJIUzI1NiIsInR...",
-                                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5...",
-                            },
-                        }
-                    }
-                },
-            },
-            400: {
-                "description": "Invalid credentials or missing fields",
-                "content": {
-                    "application/json": {
-                        "example": {
-                            "message": "Invalid data provided",
-                            "data": {
-                                "email": ["This field is required."],
-                                "password": ["This field is required."],
-                            },
-                        }
-                    }
-                },
-            },
-        },
+            200: SuccessResponseSerializer,
+                400: ErrorResponseSerializer,},
         examples=[
             OpenApiExample(
                 "Successful Login",

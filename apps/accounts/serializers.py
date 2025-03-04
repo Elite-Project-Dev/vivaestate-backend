@@ -70,7 +70,7 @@ class AgentSignupSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     agency_name = serializers.CharField(required=True, max_length=255)
-    contact_info = serializers.CharField()
+    whatsapp_number = serializers.CharField()
 
     class Meta:
         model = AgentProfile  # Link to the actual model that this serializer represents
@@ -81,7 +81,7 @@ class AgentSignupSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "agency_name",
-            "contact_info",
+            "whatsapp_number",
         ]
 
     def validate(self, attrs):
@@ -130,6 +130,10 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
 
 class ResendEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
+    
+class VerifyCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
 
 
 class SetNewPasswordSerializer(serializers.Serializer):

@@ -18,6 +18,8 @@ urlpatterns = [
         PasswordTokenCheckAPI.as_view(),
         name="password-reset-confirm",
     ),
+    path('password-reset-confirm/<str:uidb64>/<str:token>/', PasswordTokenCheckAPI.as_view(), name='password-reset-confirm'),
+
     path("verify-code/", VerifyCodeView.as_view(), name="verify-signup-code"),
     path("login/", LoginView.as_view(), name="login")
 ]
