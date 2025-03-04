@@ -40,17 +40,6 @@ class SignupSerializer(serializers.ModelSerializer):
 
         return attrs
 
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            email=validated_data["email"],
-            username=validated_data["username"],
-            password=validated_data["password"],
-            first_name=validated_data["first_name"],
-            last_name=validated_data["last_name"],
-            whatsapp_number=validated_data["whatsapp_number"],
-            is_active=False,
-        )
-        return user
 
 
 class AgentSignupSerializer(serializers.ModelSerializer):

@@ -703,6 +703,21 @@ offline = ["drf-spectacular-sidecar"]
 sidecar = ["drf-spectacular-sidecar"]
 
 [[package]]
+name = "drf-spectacular-sidecar"
+version = "2025.3.1"
+description = "Serve self-contained distribution builds of Swagger UI and Redoc with Django"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "drf_spectacular_sidecar-2025.3.1-py3-none-any.whl", hash = "sha256:6b9c96204c8e45a06c39928dad704b18536d3253b61591c478540b63db6bdcea"},
+    {file = "drf_spectacular_sidecar-2025.3.1.tar.gz", hash = "sha256:7425940a409fb68a46c9b024eb504098fab5b4d73d12573efcaef048445d678f"},
+]
+
+[package.dependencies]
+Django = ">=2.2"
+
+[[package]]
 name = "drf-yasg"
 version = "1.21.8"
 description = "Automated generation of real Swagger/OpenAPI 2.0 schemas from Django Rest Framework code."
@@ -1988,4 +2003,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "68fdf484bdedd64b233a4333b69d2a089dbe2b04a7b589fd8dfa1b9ee364a0e6"
+content-hash = "e68142fa08c20b05e76549b86096d7fea37a7f6659746b92be2984e132e101a8"

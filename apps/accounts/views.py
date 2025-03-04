@@ -30,6 +30,8 @@ from drf_spectacular.utils import extend_schema, OpenApiExample
 logger = logging.getLogger(__file__)
 
 tags = ["auth"]
+
+
 class UserSignupView(APIView, CustomResponseMixin):
     """
     API endpoint for user registration.
@@ -56,11 +58,11 @@ class UserSignupView(APIView, CustomResponseMixin):
         """  Handle user registration. """
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
             user_data = serializer.validated_data
             email = user_data["email"]
             cache.set(
                 f"user_data_{email}",
+                user_data, 
                 timeout=3600,
             )  # Cache expires in 1 hour
             try:
@@ -120,11 +122,11 @@ class AgentSignupView(APIView, CustomResponseMixin):
         """ Handles agent registration. """
         serializer = AgentSignupSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
             user_data = serializer.validated_data
             email = user_data["email"]
             cache.set(
                 f"user_data_{email}",
+                 user_data, 
                 timeout=3600,
             )  # Cache expires in 1 hour
             try:
@@ -217,7 +219,7 @@ class VerifyCodeView(CustomResponseMixin, APIView):
     """
     permission_classes = [AllowAny]
     @extend_schema(
-    request=VerifyCodeSerializer,  # 👈 Defines expected request body
+    request=VerifyCodeSerializer,  # Defines expected request body
     responses={
         200: OpenApiResponse(description="Authentication code verified successfully. Your account has been activated."),
         400: OpenApiResponse(description="Invalid data provided (e.g., missing email/code, expired code)."),
