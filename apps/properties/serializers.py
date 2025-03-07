@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Document, Property
-
+from services import PROPERTY_TYPES, PROPERTY_STATUS_CHOICES
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Document
@@ -17,7 +17,8 @@ class PropertySerializer(serializers.ModelSerializer):
     bedrooms = serializers.CharField(required=False)
     bathrooms = serializers.CharField(required=False)
     square_feet = serializers.CharField(required=False)
-    
+    property_type = serializers.ChoiceField(choices=PROPERTY_TYPES)
+    status=serializers.ChoiceField(choices=PROPERTY_STATUS_CHOICES)
     class Meta:
         model = Property
         fields = [

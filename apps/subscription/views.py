@@ -21,7 +21,8 @@ from drf_yasg import openapi
 from .models import Subscription, SubscriptionPlan
 from .serializers import SubscriptionPlanSerializer, SubscriptionSerializer
 from .utils import create_payment_plan
-
+from apps.accounts.permission import IsSuperUser, IsAgent
+from rest_framework.permissions import IsAuthenticated
 
 class SubscriptionPlanViewSet(viewsets.ModelViewSet, CustomResponseMixin):
     """
@@ -29,7 +30,7 @@ class SubscriptionPlanViewSet(viewsets.ModelViewSet, CustomResponseMixin):
     """
     queryset = SubscriptionPlan.objects.all()
     serializer_class = SubscriptionPlanSerializer
-
+    permission_classes =[IsSuperUser, IsAuthenticated]
     @extend_schema(
         description="Create a new subscription plan and register it with Flutterwave.",
         responses={201: SubscriptionPlanSerializer()},
@@ -76,7 +77,7 @@ class SubscriptionViewSet(viewsets.ModelViewSet, CustomResponseMixin):
     """
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAgent]
 
     @swagger_auto_schema(
         method="post",
@@ -128,7 +129,7 @@ class SubscriptionViewSet(viewsets.ModelViewSet, CustomResponseMixin):
 
 
 @csrf_exempt
-def flutterwave_webhook(request):
+def flutterwave_webhook(request):    # it can be sent when it o local production
     """
     Webhook for handling payment updates from Flutterwave.
     """
