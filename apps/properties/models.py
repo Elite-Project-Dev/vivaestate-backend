@@ -1,9 +1,9 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
+from django.conf import settings
 from apps.accounts.models import Audit
 from services import DOCUMENT_TYPE_CHOICES, PROPERTY_STATUS_CHOICES, PROPERTY_TYPES
-
+from django.urls import reverse
 
 def upload_property_documents(instance, filename):
     return f"properties/{instance.property.id}/documents/{filename}"
@@ -22,6 +22,13 @@ class Document(Audit):
 
 
 class Property(Audit):
+    assigned_agent = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_properties'
+    )
     title = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     property_type = models.CharField(max_length=50, choices=PROPERTY_TYPES)
@@ -57,3 +64,5 @@ class Property(Audit):
         """Checks if the agent has an active subscription"""
         # Assuming there's an 'agent' attribute related to this property
         return self.user.subscription.active if hasattr(self, 'agent') and hasattr(self.agent, 'subscription') else False
+    def get_absolute_url(self):
+       return reverse("property-detail", kwargs={"pk": self.pk})

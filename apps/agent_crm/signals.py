@@ -4,7 +4,7 @@ from .models import Lead
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
-from .utils import send_whatsapp_message
+from services import send_whatsapp_message
 
 
 
@@ -26,7 +26,7 @@ def send_lead_notification(sender, instance, created, **kwargs):
         if buyer_phone:  # Ensure the buyer has a phone number
             buyer_whatsapp_message = f"Hello {instance.buyer.first_name},\n"
             buyer_whatsapp_message += f"Your inquiry for {instance.property} has been received.\n"
-            buyer_whatsapp_message += f"Our agent will contact you soon."
+            buyer_whatsapp_message += f"Our agent wi ll contact you soon."
             send_whatsapp_message(buyer_phone, buyer_whatsapp_message)
 
         if agent and agent.email:

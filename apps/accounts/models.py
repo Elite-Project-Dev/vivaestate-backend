@@ -16,7 +16,7 @@ class User(AbstractUser, Audit):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     is_agent = models.BooleanField(default=False)
-    whatsapp_number = models.CharField(max_length=15, null=False, blank=True,) #unique=True)
+    whatsapp_number = models.CharField(max_length=15, null=False, blank=True,)
 
 class UserProfile(Audit):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

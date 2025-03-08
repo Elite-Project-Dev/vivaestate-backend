@@ -1,6 +1,8 @@
 from twilio.rest import Client
 from django.conf import settings
+from celery import shared_task
 
+@shared_task
 def send_whatsapp_message(to, message):
     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     try:

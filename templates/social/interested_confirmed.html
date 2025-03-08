@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+
+{% block main %}
+    <p>Hello {{ first_name }},</p>
+
+    <p>Thank you for showing interest in <strong>{{ property_title }}</strong>.</p>
+
+    <p>Your assigned agent will reach out to you soon.</p>
+
+    <p><strong>Agent Contact Details:</strong></p>
+    <p>Email: {{ agent_email }}</p>
+    <p>WhatsApp: {{ agent_whatsapp_no }}</p>
+
+    <p>You can view the property details here:</p>
+    <p><a href="{{ property_link }}">{{ property_link }}</a></p>
+
+    <p>We appreciate your trust in our platform. Let us know if you need further assistance.</p>
+
+    <p>Best regards,<br>
+    The Real Estate Team</p>
+{% endblock main %}

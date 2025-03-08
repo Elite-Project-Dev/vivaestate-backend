@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <p>Hello {{ assigned_agent }},</p>
+
+    <p>You have a new interested buyer for one of your properties.</p>
+
+    <p><strong>Buyer Name:</strong> {{ intrested_buyer }}</p>
+    <p><strong>WhatsApp Contact:</strong> {{ intrested_buyer_whatsapp_no }}</p>
+
+    <p>The buyer is interested in the following property:</p>
+    <p><a href="{{ property_link }}">{{ property_link }}</a></p>
+
+    <p>Please reach out to the buyer as soon as possible.</p>
+
+    <p>Best regards,<br>
+    The Real Estate Team</p>
+{% endblock main %}

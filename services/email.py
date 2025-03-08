@@ -31,7 +31,7 @@ class EmailService:
         send_email_task(subject, recipient_email, template_name, context)
 
     def send_signup_verification_email(self, request, user_data):
-        first_name = str(user_data["first_name"]).capitalize()  # ✅ Access dict keys
+        first_name = str(user_data["first_name"]).capitalize()  
         verification_url = self.create_verification_url(request, user_data["email"])
         auth_code = get_random_string(length=6, allowed_chars="0123456789")
 
@@ -72,7 +72,60 @@ class EmailService:
             template_name="accounts/password_reset.html",
             context=context,
         )
-        
+    def send_prospect_to_agent(self, request, property_id):
+        """Notify the agent about the interested buyer""" 
+        user = request.user
+        property_id = request.data.get("property_id")
+        from apps.properties.models import Property
+        try:
+          property_obj = Property.objects.get(id=property_id)
+        except Property.DoesNotExist:
+          return "Property not found"
+
+        assigned_agent = property_obj.agent
+        property_link=request.build_absolute_uri(property_obj.get_absolute_url())
+        if not assigned_agent or not assigned_agent.email:
+           return "Agent email not found"
+        context = {
+            "assigned_agent":assigned_agent.email,
+            "intrested_buyer":user.first_name,
+            "property_link":property_link,
+            "intrested_buyer_whatsapp_no":user.whatsapp_number
+        }
+        self.send_email(
+            subject="New Buyer Interest in Your Property",
+            recipient_email=assigned_agent.email,
+            template_name="social/intrested_buyer.html",
+            context=context,
+        )
+    def send_possible_deal(self, request, property_id):
+        """Notify the buyer that the agent will reach out"""
+        user = request.user
+        from apps.properties.models import Property
+
+        try:
+          property_obj = Property.objects.get(id=property_id)
+        except Property.DoesNotExist:
+          return "Property not found"
+        assigned_agent = property_obj.assigned_agent
+        property_link=request.build_absolute_uri(property_obj.get_absolute_url())
+        if not user.email:
+            return "User email not found"
+        context = {
+            "first_name": user.first_name,
+            "property_title": property_obj.title,
+            "agent_whatsapp_no":assigned_agent.whatsapp_number if assigned_agent.whatsapp_number else "Not available",
+            "agent_email":assigned_agent.email,
+            "property_link":property_link
+        }
+        self.send_email(
+            subject="Interest Confirmed - Your Assigned Agent",
+            recipient_email=user.email,
+            template_name="social/interested_confirmed.html",
+            context=context,
+        )
+
+
 
 
 
