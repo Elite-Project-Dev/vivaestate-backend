@@ -1,4 +1,3 @@
-version: '27.4'
 
 services:
   web:
@@ -11,6 +10,9 @@ services:
       - .:/vivaestate
     env_file:
       - .env
+    depends_on:
+      - db
+    restart: always
       
   db:
     image: postgres:13
@@ -18,5 +20,35 @@ services:
       POSTGRES_USER: postgres  # Set the PostgreSQL username
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Set the PostgreSQL password
       POSTGRES_DB: vivaestate
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistent storage
+    restart: always    # Auto-restart if crashes
+  redis:
+    image: redis:alpine
+    restart: always
+  celery:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+    command: celery -A drf_project worker --loglevel=info
+    volumes:
+      - .:/vivaestate
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+    restart: always
+  celery-beat:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+    command: celery -A drf_project beat --loglevel=info  # For periodic tasks
+    depends_on:
+      - redis
+      - db
+      - celery
+    env_file:
+      - .env
 volumes:
   postgres_data:  # Define a named volume for PostgreSQL data

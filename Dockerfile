@@ -1,27 +1,31 @@
-# Use Python 3.13.1 base image
-FROM python:3.13-slim
-
+# Use Python 3.12 slim as base image
+FROM python:3.12-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
-
 # Set the working directory inside the container
 WORKDIR /vivaestate
 
-COPY pyproject.toml poetry.lock /vivaestate/
+# Install system dependencies (build essentials if needed)
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies using Poetry
-RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi
+# Copy requirements.txt first for better caching
+COPY requirements.txt /vivaestate/
 
-# Copy project files into the container's working directory
+# Install Python dependencies using pip
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the entire project into the container
 COPY . /vivaestate/
 
-# Expose the application port
+# Expose port 8000 (Django default)
 EXPOSE 8000
 
-# Run the Django application
+# Command to run Django server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

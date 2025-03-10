@@ -38,7 +38,7 @@ class FavouritePropertyView(APIView, CustomResponseMixin):
                 message=f"Failed to send email: {str(e)}",
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        Favourite.objects.create(user=user, property=property_obj)
+        Favourite.objects.create(user=user, property=property_obj, assigned_agent=property_obj.assigned_agent)
         return self.custom_response(
             status=status.HTTP_201_CREATED,
             message="Property liked successfully, and emails sent"

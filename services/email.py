@@ -82,7 +82,7 @@ class EmailService:
         except Property.DoesNotExist:
           return "Property not found"
 
-        assigned_agent = property_obj.agent
+        assigned_agent = property_obj.assigned_agent
         property_link=request.build_absolute_uri(property_obj.get_absolute_url())
         if not assigned_agent or not assigned_agent.email:
            return "Agent email not found"
@@ -90,12 +90,12 @@ class EmailService:
             "assigned_agent":assigned_agent.email,
             "intrested_buyer":user.first_name,
             "property_link":property_link,
-            "intrested_buyer_whatsapp_no":user.whatsapp_number
+            "intrested_buyer_whatsapp_no":user.whatsapp_number if user.whatsapp_number else "Not available"
         }
         self.send_email(
             subject="New Buyer Interest in Your Property",
             recipient_email=assigned_agent.email,
-            template_name="social/intrested_buyer.html",
+            template_name="social/interested_buyer.html",
             context=context,
         )
     def send_possible_deal(self, request, property_id):
