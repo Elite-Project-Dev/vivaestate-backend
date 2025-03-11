@@ -10,7 +10,7 @@ class PropertyEmbeddingSerializer(serializers.ModelSerializer):
 class PropertyChatHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PropertyChatHistory
-        fields = ['id', 'property', 'user_question', 'ai_answer', 'created_at']
+        fields = ['id','user','property', 'question', 'answer', 'created_at']
 
 class PropertyChatSerializer(serializers.Serializer):
-    question = serializers.CharField()
+    question = serializers.CharField(max_length=400)

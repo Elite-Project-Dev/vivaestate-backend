@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
 from services import CustomResponseMixin
 from rest_framework import status
-from .models import Property, PropertyEmbedding
+from .models import  PropertyEmbedding, PropertyChatHistory
 from .serializers import PropertyChatSerializer
 import openai
 import numpy as np
+from apps.properties.models import Property
 
 class PropertyChatAPIView(APIView, CustomResponseMixin):
     def post(self, request, property_id):
@@ -27,10 +28,26 @@ class PropertyChatAPIView(APIView, CustomResponseMixin):
             #Sort and select top 3 relevant chunks
             top_chunks = sorted(chunks_with_scores, key=lambda x: x[0], reverse=True)[:3]
             context = "\n".join([chunk for _, chunk in top_chunks])
+
+             # Fetch recent chat history for this property (limit last 5)
+            chat_history_qs = PropertyChatHistory.objects.filter(property_id=property_id).order_by('-created_at')[:5]
+            # Build chat history context
+            chat_context = ""
+            for chat in reversed(chat_history_qs):  # Oldest to newest
+                chat_context += f"User: {chat.question}\nAI: {chat.answer}\n"
+            
+            final_context = f"Property Information:\n{context}\n\nRecent Conversation:\n{chat_context}"
             #  Build prompt
-            prompt = f"Context:\n{context}\n\nQuestion:\n{question}\n\nAnswer:"
+            prompt = f"Context:\n{final_context}\n\nQuestion:\n{question}\n\nAnswer:"
             # Call OpenAI Chat API
             answer = self.call_openai_chat(prompt)
+            # Save this chat to ChatHistory for future context
+            PropertyChatHistory.objects.create(
+                property_id=property_id,
+                user=request.user if request.user.is_authenticated else None,  # Optional: store user
+                question=question,
+                answer=answer
+            )
             return self.custom_response(message= answer, status=status.HTTP_200_OK)
         else:
           return self.custom_response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
