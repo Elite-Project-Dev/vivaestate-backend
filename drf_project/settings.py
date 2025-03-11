@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "apps.social",
     "apps.properties",
     "apps.agent_crm",
-    "apss.ai_assistant",
+    "apps.ai_assistant",
 ]
 
 MIDDLEWARE = [

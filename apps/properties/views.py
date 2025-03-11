@@ -18,49 +18,7 @@ from services import CustomResponseMixin
 from apps.accounts.permission import  IsAgent, HasActiveSubscription
 from .models import Property
 from .serializers import PropertySerializer
-from rest_framework import generics
-from .serializers import UpdateLocationSerializer
 
-class UpdateLocationView(generics.UpdateAPIView):
-    """ Updates the latitude and longitude of a property. """
-
-    serializer_class = UpdateLocationSerializer 
-    permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]
-
-    @swagger_auto_schema(
-        operation_description="Update the location of a property",
-        manual_parameters=[
-            openapi.Parameter('pk', openapi.IN_PATH, description="Property ID", type=openapi.TYPE_INTEGER),
-            openapi.Parameter('latitude', openapi.IN_QUERY, description="New latitude", type=openapi.TYPE_NUMBER),
-            openapi.Parameter('longitude', openapi.IN_QUERY, description="New longitude", type=openapi.TYPE_NUMBER),
-        ],
-        responses={
-            200: openapi.Response("Location updated successfully"),
-            400: openapi.Response("Invalid latitude or longitude"),
-            404: openapi.Response("Property not found"),
-        }
-    )
-    def put(self, request, pk):
-        """ Handles updating property location. """
-        try:
-            property = Property.objects.get(pk=pk)
-        except Property.DoesNotExist:
-            return Response({"error": "Property not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        latitude = request.data.get('latitude')
-        longitude = request.data.get('longitude')
-
-        try:
-            latitude = float(latitude)
-            longitude = float(longitude)
-        except (TypeError, ValueError):
-            return Response({"error": "Invalid latitude or longitude"}, status=status.HTTP_400_BAD_REQUEST)
-
-        property.latitude = latitude
-        property.longitude = longitude
-        property.save()
-
-        return Response({"message": "Location updated successfully"}, status=status.HTTP_200_OK)
 
 class CustomResponseModelViewSet(CustomResponseMixin, viewsets.ModelViewSet):
     """ Custom response formatting for ViewSets """

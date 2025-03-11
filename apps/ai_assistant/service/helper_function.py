@@ -1,4 +1,4 @@
-from services import save_property_embeddings
+from service import save_property_embeddings
 from utils import chunk_text
 def process_property_document(property_instance, document_text):
     """

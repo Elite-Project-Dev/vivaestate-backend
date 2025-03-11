@@ -5,7 +5,7 @@ from .models import  PropertyEmbedding, PropertyChatHistory
 from .serializers import PropertyChatSerializer
 import openai
 import numpy as np
-from apps.properties.models import Property
+
 
 class PropertyChatAPIView(APIView, CustomResponseMixin):
     def post(self, request, property_id):

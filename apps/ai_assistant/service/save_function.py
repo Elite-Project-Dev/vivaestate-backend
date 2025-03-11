@@ -1,5 +1,5 @@
 from apps.ai_assistant.models import PropertyEmbedding
-from services import generate_embeddling
+from service import generate_embeddling
 
 def save_property_embeddings(property_instance, chunks):
     """

@@ -1,7 +1,7 @@
 from django.db.models import post_save
 from django.dispatch import receiver
 from apps.properties.models import Document
-from services import process_property_document
+from service import process_property_document
 
 
 @receiver(post_save, sender=Document)

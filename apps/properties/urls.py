@@ -3,13 +3,12 @@ from django.conf.urls.static import static
 from django.urls import include, path
 from rest_framework_nested import routers
 
-from .views import PropertyViewSet, UpdateLocationView
+from .views import PropertyViewSet
 
 router = routers.SimpleRouter()
 router.register("property", PropertyViewSet, basename="property")
 
 urlpatterns = [
-    path('api/properties/<int:pk>/update-location/', UpdateLocationView.as_view(), name='update-location'),
     path('properties/affordable/', PropertyViewSet.as_view({'get': 'list'}),
          {'price_max': 50000}),
     path('properties/luxury/', PropertyViewSet.as_view({'get': 'list'}),
