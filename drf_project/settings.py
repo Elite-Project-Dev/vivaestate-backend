@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "apps.social",
     "apps.properties",
     "apps.agent_crm",
+    "apss.ai_assistant",
 ]
 
 MIDDLEWARE = [
@@ -204,3 +205,5 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+OPENAI_API_KEY=config("OPENAI_API_KEY")
