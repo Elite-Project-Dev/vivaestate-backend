@@ -53,7 +53,6 @@ class Property(Audit):
     status = models.CharField(max_length=50, choices=PROPERTY_STATUS_CHOICES, default='available')
     image = models.ImageField(upload_to='property_images/', blank=True, null=True)
     video = models.FileField(upload_to='property_videos/', blank=True, null=True)
-    document = models.FileField(upload_to='property_documents/', blank=True, null=True)
     for_sale = models.BooleanField(default=False)
     for_rent = models.BooleanField(default=False)
 

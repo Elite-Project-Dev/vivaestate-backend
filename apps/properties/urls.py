@@ -3,11 +3,11 @@ from django.conf.urls.static import static
 from django.urls import include, path
 from rest_framework_nested import routers
 
-from .views import PropertyViewSet
+from .views import PropertyViewSet, DocumentViewSet
 
 router = routers.SimpleRouter()
 router.register("property", PropertyViewSet, basename="property")
-
+router.register("documents", DocumentViewSet, basename='document')
 urlpatterns = [
     path('properties/affordable/', PropertyViewSet.as_view({'get': 'list'}),
          {'price_max': 50000}),

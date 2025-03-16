@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
+import redis
+import ssl
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -196,14 +198,25 @@ SIMPLE_JWT = {
 }
 
 
-# Celery Configuration
-CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Assuming Redis is running locally
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+# Celery Configuratiocn
+CELERY_BROKER_URL=config("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND=CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
 
+
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 OPENAI_API_KEY=config("OPENAI_API_KEY")
+
+
+# SSL options for Redis over SSL (rediss)
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'ssl_cert_reqs': ssl.CERT_NONE  # Avoid SSL verification, use CERT_REQUIRED if needed
+}
+
+CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {
+    'ssl_cert_reqs': ssl.CERT_NONE  # Same for backend
+}

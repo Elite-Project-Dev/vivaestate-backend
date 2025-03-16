@@ -41,6 +41,7 @@ urlpatterns = [
     path("social/", include("apps.social.urls")), 
     path("subscription/", include("apps.subscription.urls")),
     path("leads/", include("apps.agent_crm.urls")),
+    path("ai_assistant", include("apps.ai_assistant.urls")),
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="swagger-ui"),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="redoc"),
 ]

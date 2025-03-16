@@ -3,6 +3,7 @@ DOCUMENT_TYPE_CHOICES = [
         ('title_deed', 'Title Deed'),
         ('warranty_deed', 'Warranty Deed'),
         ('grant_deed', 'Grant Deed'),
+        ('FAQ', 'FAQ')
     ]
 
 

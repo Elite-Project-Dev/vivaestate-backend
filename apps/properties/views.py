@@ -7,7 +7,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
-
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -16,8 +16,8 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from services import CustomResponseMixin
 from apps.accounts.permission import  IsAgent, HasActiveSubscription
-from .models import Property
-from .serializers import PropertySerializer
+from .models import Property, Document
+from .serializers import PropertySerializer, DocumentSerializer
 
 
 class CustomResponseModelViewSet(CustomResponseMixin, viewsets.ModelViewSet):
@@ -57,7 +57,6 @@ class PropertyViewSet(CustomResponseModelViewSet):
     serializer_class = PropertySerializer
     search_fields = ['title', 'description']
     ordering_fields = ['price', 'created_at', 'square_feet']
-
     def get_permissions(self):
         """ Assign permissions based on request method """
         if self.request.method == "GET":
@@ -115,3 +114,20 @@ class PropertyViewSet(CustomResponseModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return self.custom_response(data=serializer.data, status=status.HTTP_200_OK)
+    @action(detail=True, methods=['get'])
+    def documents(self, request, pk=None):
+        property = self.get_object()
+        documents = property.documents.all()
+        serializer = DocumentSerializer(documents, many=True)
+        return self.custom_response(data=serializer.data) 
+class DocumentViewSet(viewsets.ModelViewSet):
+    queryset = Document.objects.all()
+    serializer_class = DocumentSerializer
+    parser_classes = (MultiPartParser, FormParser)
+    def get_permissions(self):
+        """ Assign permissions based on request method """
+        if self.request.method == "GET":
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]
+        return [permission() for permission in permission_classes]
