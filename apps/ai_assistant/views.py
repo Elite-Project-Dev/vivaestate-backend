@@ -11,9 +11,9 @@ class PropertyChatAPIView(APIView, CustomResponseMixin):
     def post(self, request, property_id):
         serializer = PropertyChatSerializer(data=request.data)
         if serializer.is_valid():
-            question = serializer.validate_data(data=request.data)
+            question = serializer.validated_data
             # This Fetch embeddings for this property
-            embeddings_qs = PropertyEmbedding.filter(property_id=property_id)
+            embeddings_qs = PropertyEmbedding.objects.filter(property_id=property_id)
             if not embeddings_qs.exists():
                return self.custom_response(message='No data available for this property.', status=status.HTTP_404_NOT_FOUND)
             
