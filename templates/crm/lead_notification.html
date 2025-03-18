@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>Hello,</p>
+
+    <p>You have a new lead for your property.</p>
+
+    <p><strong>Interested Buyer:</strong> {{ interest_buyer }}</p>
+    <p><strong>Message from Buyer:</strong> {{ buyer_message }}</p>
+    <p><strong>Property Link:</strong> <a href="{{ property_link }}">{{ property_link }}</a></p>
+
+    {% if intrested_buyer_whatsapp_no %}
+        <p><strong>Buyer's WhatsApp:</strong> {{ intrested_buyer_whatsapp_no }}</p>
+    {% endif %}
+
+    <p>Kindly reach out to the buyer as soon as possible.</p>
+
+    <p>Best regards,</p>
+{% endblock %}

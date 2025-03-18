@@ -1,13 +1,15 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import OrderingFilter, SearchFilter
 from drf_yasg.utils import swagger_auto_schema
 from drf_spectacular.utils import extend_schema
 from .models import Lead
 from .serializers import LeadSerializer
+from services import EmailService, CustomResponseMixin
+from rest_framework import status
+from rest_framework import mixins, viewsets
 
-
-class LeadViewSet(viewsets.ModelViewSet):
+class LeadViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet, CustomResponseMixin):
     """
     API endpoint for managing leads.
     """
@@ -37,8 +39,24 @@ class LeadViewSet(viewsets.ModelViewSet):
         operation_description="Create a new lead and assign it to the authenticated agent.",
         responses={201: LeadSerializer()},
     )
-    def perform_create(self, serializer):
-        """
-        Assign the currently authenticated user as the agent when creating a lead.
-        """
-        serializer.save(assigned_agent=self.request.user)
+    def post(self, request, property_id):
+        serializer = LeadSerializer
+        if serializer.is_valid():
+            try:
+                property_id = int(property_id)
+            except ValueError:
+                return self.custom_response(message="Invalid property ID", status=status.HTTP_400_BAD_REQUEST)
+            try:
+                email_service = EmailService
+                email_service.send_agent_lead_notification(request, property_id)
+                email_service.comfirmation_of_sent_lead(request, property_id)
+            except Exception as e:
+                return self.custom_response(
+                    message=f"Failed to send email: {str(e)}",
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+        return self.custom_response(
+            status=status.HTTP_400_BAD_REQUEST,
+            message="Invalid data provided.",
+            data=serializer.errors,
+        )

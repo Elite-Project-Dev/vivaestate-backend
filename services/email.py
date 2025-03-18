@@ -75,7 +75,7 @@ class EmailService:
     def send_prospect_to_agent(self, request, property_id):
         """Notify the agent about the interested buyer""" 
         user = request.user
-        property_id = request.data.get("property_id")
+        
         from apps.properties.models import Property
         try:
           property_obj = Property.objects.get(id=property_id)
@@ -83,14 +83,15 @@ class EmailService:
           return "Property not found"
 
         assigned_agent = property_obj.assigned_agent
+        assigned_agent_profile = property_obj.assigned_agent.agentprofile if assigned_agent.agentprofile else ""
         property_link=request.build_absolute_uri(property_obj.get_absolute_url())
         if not assigned_agent or not assigned_agent.email:
            return "Agent email not found"
         context = {
-            "assigned_agent":assigned_agent.email,
-            "intrested_buyer":user.first_name,
+            "assigned_agent":assigned_agent_profile.agency_name,
+            "interested_buyer":user.first_name,
             "property_link":property_link,
-            "intrested_buyer_whatsapp_no":user.whatsapp_number if user.whatsapp_number else "Not available"
+            "intrested_buyer_whatsapp_no":user.whatsapp_number if user.whatsapp_number else ""
         }
         self.send_email(
             subject="New Buyer Interest in Your Property",
@@ -124,9 +125,54 @@ class EmailService:
             template_name="social/interested_confirmed.html",
             context=context,
         )
-
-
-
+    def send_agent_lead_notification(self, request, property_id):
+            """Notify agent about the customer message on insterest of agent posted property"""
+            user = request.user
+            message = request.data.get("message", "No message provided")
+            from apps.properties.models import Property
+            try:
+                property_obj = Property.objects.get(id=property_id)
+            except Property.DoesNotExist:
+               return "Property not found"
+            assigned_agent = property_obj.assigned_agent if property_obj.assigned_agent else ""
+            property_link=request.build_absolute_uri(property_obj.get_absolute_url())
+            context = {
+                "insterest_buyer": user.first_name,
+                "property_link":property_link,
+                "buyer_message": message,
+                "intrested_buyer_whatsapp_no":user.whatsapp_number if user.whatsapp_number else ""
+            }
+            self.send_email(
+                subject="New Lead: Interest in Your Property",
+                recipient_email=assigned_agent.email,
+                template_name="crm/lead_notification.html",
+                context=context,
+            )
+    def comfirmation_of_sent_lead(self, request, property_id):
+            """Notify customer about the sent lead to assigned agent"""
+            user = request.user
+            from apps.properties.models import Property
+            try:
+                property_obj = Property.objects.get(id=property_id)
+            except Property.DoesNotExist:
+                return "Property not found"
+            assigned_agent = property_obj.assigned_agent
+            if not assigned_agent or not assigned_agent.email:
+                return "Agent email not found"
+            assigned_agent_profile = property_obj.assigned_agent.agentprofile if assigned_agent.agentprofile else ""
+            property_link=request.build_absolute_uri(property_obj.get_absolute_url())
+            context = {
+                "first_name": user.first_name,
+                "assigned_agent": assigned_agent_profile.agent_name,
+                "property_link": property_link,
+                "agent_whatsapp_number": assigned_agent.whatsapp_number,
+            }
+            self.send_email(
+                subject="Interest Confirmed - Your Assigned Agent",
+                recipient_email=user.email,
+                template_name="crm/send_lead.html",
+                context=context,
+            )
 
 
 

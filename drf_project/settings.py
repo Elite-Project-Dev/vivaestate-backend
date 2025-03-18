@@ -199,7 +199,7 @@ SIMPLE_JWT = {
 
 
 # Celery Configuratiocn
-CELERY_BROKER_URL=config("CELERY_BROKER_URL")
+CELERY_BROKER_URL='redis://127.0.0.1:6379/0'
 CELERY_RESULT_BACKEND=CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -211,12 +211,3 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 OPENAI_API_KEY=config("OPENAI_API_KEY")
 
-
-# SSL options for Redis over SSL (rediss)
-CELERY_BROKER_TRANSPORT_OPTIONS = {
-    'ssl_cert_reqs': ssl.CERT_NONE  # Avoid SSL verification, use CERT_REQUIRED if needed
-}
-
-CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = {
-    'ssl_cert_reqs': ssl.CERT_NONE  # Same for backend
-}

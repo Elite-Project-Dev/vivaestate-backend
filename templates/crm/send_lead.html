@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>Dear {{ first_name }},</p>
+
+    <p>Your interest in the property has been successfully sent to the assigned agent.</p>
+
+    <p><strong>Assigned Agent:</strong> {{ assigned_agent }}</p>
+    <p><strong>Property Link:</strong> <a href="{{ property_link }}">{{ property_link }}</a></p>
+
+    {% if agent_whatsapp_number %}
+        <p><strong>Agent's WhatsApp:</strong> {{ agent_whatsapp_number }}</p>
+    {% endif %}
+
+    <p>The agent will contact you soon. Thank you for using our platform!</p>
+
+    <p>Best regards,</p>
+{% endblock %}
