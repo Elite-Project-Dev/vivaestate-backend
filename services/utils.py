@@ -1,6 +1,9 @@
 from twilio.rest import Client
 from django.conf import settings
 from celery import shared_task
+import logging 
+
+logger=logging.getLogger(__name__)
 
 @shared_task
 def send_whatsapp_message(to, message):
@@ -13,4 +16,6 @@ def send_whatsapp_message(to, message):
         )
         return msg.sid
     except Exception as e:
-        return str(e)
+        error_message = f"Error sending WhatsApp message to {to}: {str(e)}"
+        logger.error(error_message)
+        return error_message

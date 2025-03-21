@@ -83,12 +83,11 @@ class EmailService:
           return "Property not found"
 
         assigned_agent = property_obj.assigned_agent
-        assigned_agent_profile = property_obj.assigned_agent.agentprofile if assigned_agent.agentprofile else ""
         property_link=request.build_absolute_uri(property_obj.get_absolute_url())
         if not assigned_agent or not assigned_agent.email:
            return "Agent email not found"
         context = {
-            "assigned_agent":assigned_agent_profile.agency_name,
+            "assigned_agent":assigned_agent.first_name,
             "interested_buyer":user.first_name,
             "property_link":property_link,
             "intrested_buyer_whatsapp_no":user.whatsapp_number if user.whatsapp_number else ""
@@ -159,13 +158,12 @@ class EmailService:
             assigned_agent = property_obj.assigned_agent
             if not assigned_agent or not assigned_agent.email:
                 return "Agent email not found"
-            assigned_agent_profile = property_obj.assigned_agent.agentprofile if assigned_agent.agentprofile else ""
             property_link=request.build_absolute_uri(property_obj.get_absolute_url())
             context = {
                 "first_name": user.first_name,
-                "assigned_agent": assigned_agent_profile.agent_name,
+                "assigned_agent": assigned_agent.first_name,
                 "property_link": property_link,
-                "agent_whatsapp_number": assigned_agent.whatsapp_number,
+                "agent_whatsapp_number": assigned_agent.whatsapp_number if assigned_agent.whatsapp_number else "",
             }
             self.send_email(
                 subject="Interest Confirmed - Your Assigned Agent",

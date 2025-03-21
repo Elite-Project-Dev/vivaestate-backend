@@ -8,7 +8,8 @@ from .serializers import LeadSerializer
 from services import EmailService, CustomResponseMixin
 from rest_framework import status
 from rest_framework import mixins, viewsets
-
+from rest_framework.decorators import action
+from apps.properties.models import Property
 class LeadViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet, CustomResponseMixin):
     """
     API endpoint for managing leads.
@@ -39,24 +40,50 @@ class LeadViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retriev
         operation_description="Create a new lead and assign it to the authenticated agent.",
         responses={201: LeadSerializer()},
     )
-    def post(self, request, property_id):
-        serializer = LeadSerializer
-        if serializer.is_valid():
-            try:
-                property_id = int(property_id)
-            except ValueError:
-                return self.custom_response(message="Invalid property ID", status=status.HTTP_400_BAD_REQUEST)
-            try:
-                email_service = EmailService
-                email_service.send_agent_lead_notification(request, property_id)
-                email_service.comfirmation_of_sent_lead(request, property_id)
-            except Exception as e:
-                return self.custom_response(
-                    message=f"Failed to send email: {str(e)}",
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                )
+    def create(self, request, *args, **kwargs):
+        """Creates a new lead and sends notification emails."""
+
+        # Extract property_id from request body
+        property_id = request.data.get("property")  
+        message = request.data.get("message")
+        # Validate if the property exists
+        try:
+            property_obj = Property.objects.get(id=property_id)
+        except Property.DoesNotExist:
+            return self.custom_response(
+                message="Property not found.",
+                status=status.HTTP_404_NOT_FOUND
+            )
+         #  Prepare lead data (use property_obj instead of ID)
+        lead_data = {
+            "property": property_obj.id,  # Store the ID, not object
+            "buyer": request.user.id,  # Authenticated user
+            "message": message
+        }
+        #  Validate and save lead
+        serializer = LeadSerializer(data=lead_data)
+        if not serializer.is_valid():
+            return self.custom_response(
+                status=status.HTTP_400_BAD_REQUEST,
+                message="Invalid data provided.",
+                data=serializer.errors
+            )
+        assigned_agent=property_obj.assigned_agent
+        lead = serializer.save(buyer=request.user, assigned_agent=assigned_agent) 
+
+        #  Send email notifications (PASS PROPERTY ID, NOT OBJECT)
+        try:
+            email_service = EmailService()
+            email_service.send_agent_lead_notification(request, property_id)  #  Fixed
+            email_service.comfirmation_of_sent_lead(request, property_id)  #  Fixed
+        except Exception as e:
+            return self.custom_response(
+                message=f"Failed to send email: {str(e)}",
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
         return self.custom_response(
-            status=status.HTTP_400_BAD_REQUEST,
-            message="Invalid data provided.",
-            data=serializer.errors,
+            message="Lead created successfully.",
+            status=status.HTTP_201_CREATED,
+            data=LeadSerializer(lead).data
         )

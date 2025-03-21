@@ -120,6 +120,8 @@ class PropertyViewSet(CustomResponseModelViewSet):
         documents = property.documents.all()
         serializer = DocumentSerializer(documents, many=True)
         return self.custom_response(data=serializer.data) 
+    def perform_create(self, serializer):
+        serializer.save(assigned_agent=self.request.user)
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer

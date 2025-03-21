@@ -123,6 +123,7 @@ class AgentSignupView(APIView, CustomResponseMixin):
         serializer = AgentSignupSerializer(data=request.data)
         if serializer.is_valid():
             user_data = serializer.validated_data
+            user_data["is_agent"] = True 
             email = user_data["email"]
             cache.set(
                 f"user_data_{email}",
