@@ -1,19 +1,28 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import OrderingFilter, SearchFilter
-from drf_yasg.utils import swagger_auto_schema
 from drf_spectacular.utils import extend_schema
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.permissions import IsAuthenticated
+
+from apps.properties.models import Property
+from services import CustomResponseMixin, EmailService
+
 from .models import Lead
 from .serializers import LeadSerializer
-from services import EmailService, CustomResponseMixin
-from rest_framework import status
-from rest_framework import mixins, viewsets
-from rest_framework.decorators import action
-from apps.properties.models import Property
-class LeadViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet, CustomResponseMixin):
+
+
+class LeadViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+    CustomResponseMixin,
+):
     """
     API endpoint for managing leads.
     """
+
     serializer_class = LeadSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
@@ -44,21 +53,20 @@ class LeadViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retriev
         """Creates a new lead and sends notification emails."""
 
         # Extract property_id from request body
-        property_id = request.data.get("property")  
+        property_id = request.data.get("property")
         message = request.data.get("message")
         # Validate if the property exists
         try:
             property_obj = Property.objects.get(id=property_id)
         except Property.DoesNotExist:
             return self.custom_response(
-                message="Property not found.",
-                status=status.HTTP_404_NOT_FOUND
+                message="Property not found.", status=status.HTTP_404_NOT_FOUND
             )
-         #  Prepare lead data (use property_obj instead of ID)
+        #  Prepare lead data (use property_obj instead of ID)
         lead_data = {
             "property": property_obj.id,  # Store the ID, not object
             "buyer": request.user.id,  # Authenticated user
-            "message": message
+            "message": message,
         }
         #  Validate and save lead
         serializer = LeadSerializer(data=lead_data)
@@ -66,10 +74,10 @@ class LeadViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retriev
             return self.custom_response(
                 status=status.HTTP_400_BAD_REQUEST,
                 message="Invalid data provided.",
-                data=serializer.errors
+                data=serializer.errors,
             )
-        assigned_agent=property_obj.assigned_agent
-        lead = serializer.save(buyer=request.user, assigned_agent=assigned_agent) 
+        assigned_agent = property_obj.assigned_agent
+        lead = serializer.save(buyer=request.user, assigned_agent=assigned_agent)
 
         #  Send email notifications (PASS PROPERTY ID, NOT OBJECT)
         try:
@@ -85,5 +93,5 @@ class LeadViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retriev
         return self.custom_response(
             message="Lead created successfully.",
             status=status.HTTP_201_CREATED,
-            data=LeadSerializer(lead).data
+            data=LeadSerializer(lead).data,
         )

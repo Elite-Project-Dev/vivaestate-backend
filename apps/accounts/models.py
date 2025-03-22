@@ -16,7 +16,12 @@ class User(AbstractUser, Audit):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     is_agent = models.BooleanField(default=False)
-    whatsapp_number = models.CharField(max_length=15, null=False, blank=True,)
+    whatsapp_number = models.CharField(
+        max_length=15,
+        null=False,
+        blank=True,
+    )
+
 
 class UserProfile(Audit):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -52,7 +57,9 @@ class AgentProfile(Audit):
     bio = models.TextField(blank=True)
     license_number = models.CharField(max_length=50, blank=True)
     address = models.CharField(max_length=255, blank=True)
+
     def __str__(self):
         return f"{self.agency_name} - {self.user.username}"
+
     def get_agency_name(self):
         return self.agency_name

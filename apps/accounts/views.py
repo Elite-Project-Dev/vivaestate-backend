@@ -1,31 +1,48 @@
 import logging
 import os
+
 from django.conf import settings
-from django.contrib.auth import  get_user_model
+from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
 from django.core.cache import cache
-from rest_framework import parsers
 from django.core.signing import BadSignature, Signer
 from django.http import HttpResponsePermanentRedirect
 from django.utils.encoding import DjangoUnicodeDecodeError, smart_str
 from django.utils.http import urlsafe_base64_decode
-from rest_framework import generics, status
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiResponse,
+    OpenApiTypes,
+    extend_schema,
+)
+from drf_yasg import openapi
+from rest_framework import generics, parsers, status
 from rest_framework.permissions import AllowAny
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse, OpenApiTypes
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from drf_yasg import openapi
 
-from apps.accounts.models import User
-from apps.accounts.serializers import (AgentSignupSerializer, LoginSerializer,
-                                  PasswordResetTokenGenerator,
-                                  ResendEmailSerializer,
-                                  ResetPasswordEmailRequestSerializer,
-                                  ResetPasswordSerializer,
-                                  SetNewPasswordSerializer, SignupSerializer, VerifyCodeSerializer)
-from apps.accounts.models import AgentProfile
-from services import CustomResponseMixin, EmailService, SuccessResponseSerializer, ErrorDataResponseSerializer, ErrorResponseSerializer,CreateResponseSerializer, NotFoundResponseSerializer
-from drf_spectacular.utils import extend_schema, OpenApiExample
+from apps.accounts.models import AgentProfile, User
+from apps.accounts.serializers import (
+    AgentSignupSerializer,
+    LoginSerializer,
+    PasswordResetTokenGenerator,
+    ResendEmailSerializer,
+    ResetPasswordEmailRequestSerializer,
+    ResetPasswordSerializer,
+    SetNewPasswordSerializer,
+    SignupSerializer,
+    VerifyCodeSerializer,
+)
+from services import (
+    CreateResponseSerializer,
+    CustomResponseMixin,
+    EmailService,
+    ErrorDataResponseSerializer,
+    ErrorResponseSerializer,
+    NotFoundResponseSerializer,
+    SuccessResponseSerializer,
+)
 
 logger = logging.getLogger(__file__)
 
@@ -35,12 +52,14 @@ tags = ["auth"]
 class UserSignupView(APIView, CustomResponseMixin):
     """
     API endpoint for user registration.
-    
+
     Allows new users to sign up by providing necessary details.
     Sends a verification email after successful registration.
     """
+
     serializer_class = SignupSerializer
     permission_classes = [AllowAny]
+
     @extend_schema(
         summary="User Signup",
         description="Register a new user and send a verification email.",
@@ -51,18 +70,16 @@ class UserSignupView(APIView, CustomResponseMixin):
             500: ErrorResponseSerializer,
         },
         auth=[],
-       
     )
-
     def post(self, request, *args, **kwargs):
-        """  Handle user registration. """
+        """Handle user registration."""
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
             user_data = serializer.validated_data
             email = user_data["email"]
             cache.set(
                 f"user_data_{email}",
-                user_data, 
+                user_data,
                 timeout=3600,
             )  # Cache expires in 1 hour
             try:
@@ -91,7 +108,9 @@ class AgentSignupView(APIView, CustomResponseMixin):
     Allows real estate agents to sign up by providing necessary details.
     Stores user data in cache temporarily and sends a verification email.
     """
+
     permission_classes = [AllowAny]
+
     @extend_schema(
         description="Register a new agent and send a verification email.",
         request=AgentSignupSerializer,
@@ -101,33 +120,33 @@ class AgentSignupView(APIView, CustomResponseMixin):
             500: ErrorResponseSerializer,
         },
         examples=[
-        OpenApiExample(
-            'Example Request',
-            summary='Example agent signup payload',
-            description='A sample request payload for agent signup.',
-            value={
-                "email": "agent@example.com",
-                "username": "agent123",
-                "password": "securepassword",
-                "first_name": "John",
-                "last_name": "Doe",
-                "agency_name": "Doe Realty",
-                "whatsapp_number": "+2348123456789",
-            },
-            request_only=True,
-        )
-    ]
+            OpenApiExample(
+                "Example Request",
+                summary="Example agent signup payload",
+                description="A sample request payload for agent signup.",
+                value={
+                    "email": "agent@example.com",
+                    "username": "agent123",
+                    "password": "securepassword",
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "agency_name": "Doe Realty",
+                    "whatsapp_number": "+2348123456789",
+                },
+                request_only=True,
+            )
+        ],
     )
     def post(self, request, *args, **kwargs):
-        """ Handles agent registration. """
+        """Handles agent registration."""
         serializer = AgentSignupSerializer(data=request.data)
         if serializer.is_valid():
             user_data = serializer.validated_data
-            user_data["is_agent"] = True 
+            user_data["is_agent"] = True
             email = user_data["email"]
             cache.set(
                 f"user_data_{email}",
-                 user_data, 
+                user_data,
                 timeout=3600,
             )  # Cache expires in 1 hour
             try:
@@ -166,7 +185,9 @@ class ResendEmailView(CustomResponseMixin, APIView):
     This view allows users to request a new verification email
     if they haven't received one or their previous link expired.
     """
+
     permission_classes = [AllowAny]
+
     @extend_schema(
         description="Resend email verification to the user if not yet verified.",
         request=ResendEmailSerializer,
@@ -177,9 +198,8 @@ class ResendEmailView(CustomResponseMixin, APIView):
             500: ErrorResponseSerializer,
         },
     )
-
     def post(self, request, *args, **kwargs):
-        """ Handles email verification resending. """
+        """Handles email verification resending."""
         serializer = ResendEmailSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data["email"]
@@ -218,24 +238,28 @@ class VerifyCodeView(CustomResponseMixin, APIView):
 
     This view verifies the OTP sent to the user’s email and activates their account upon successful validation.
     """
+
     permission_classes = [AllowAny]
+
     @extend_schema(
-    request=VerifyCodeSerializer,  # Defines expected request body
-    responses={
-        200: OpenApiResponse(description="Authentication code verified successfully. Your account has been activated."),
-        400: OpenApiResponse(description="Invalid data provided (e.g., missing email/code, expired code)."),
-        404: OpenApiResponse(description="User not found."),
-        500: OpenApiResponse(description="Server error during verification."),
-    }
-)
-
-
+        request=VerifyCodeSerializer,  # Defines expected request body
+        responses={
+            200: OpenApiResponse(
+                description="Authentication code verified successfully. Your account has been activated."
+            ),
+            400: OpenApiResponse(
+                description="Invalid data provided (e.g., missing email/code, expired code)."
+            ),
+            404: OpenApiResponse(description="User not found."),
+            500: OpenApiResponse(description="Server error during verification."),
+        },
+    )
     def post(self, request, *args, **kwargs):
-        """ Handles authentication code verification.
+        """Handles authentication code verification.
 
         **Request Body:**
         - `email` (string, required) → User's registered email address.
-        - `code` (string, required) → 6-digit verification code. """
+        - `code` (string, required) → 6-digit verification code."""
         email = request.data.get("email")
         code = request.data.get("code")
 
@@ -287,7 +311,7 @@ class VerifyCodeView(CustomResponseMixin, APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message=f"Error during user creation: {str(e)}",
             )
-        
+
         cache.delete(f"auth_code_{email}")
         cache.delete(f"user_data_{email}")
         return self.custom_response(
@@ -299,10 +323,12 @@ class VerifyCodeView(CustomResponseMixin, APIView):
 class EmailVerifyView(CustomResponseMixin, APIView):
     """
     API endpoint to verify a user's email using a signed token.
-    
+
     This view confirms email verification and activates the user's account.
     """
+
     permission_classes = [AllowAny]
+
     @extend_schema(
         description="Verify user email using the signed token from the email link.",
         parameters=[
@@ -318,11 +344,11 @@ class EmailVerifyView(CustomResponseMixin, APIView):
             200: SuccessResponseSerializer,
             400: ErrorDataResponseSerializer,
             404: NotFoundResponseSerializer,
-            500: ErrorResponseSerializer, 
+            500: ErrorResponseSerializer,
         },
     )
     def get(self, request):
-        """ Verifies the signed token and activates the user account. """
+        """Verifies the signed token and activates the user account."""
         try:
             token = request.query_params.get("token")
             signer = Signer()
@@ -356,7 +382,7 @@ class EmailVerifyView(CustomResponseMixin, APIView):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     message=f"Error during user creation: {str(e)}",
                 )
-        
+
             cache.delete(f"auth_code_{email}")
             cache.delete(f"user_data_{email}")
             agency_name = user_data.get("agency_name")
@@ -407,8 +433,10 @@ class RequestPasswordEmail(CustomResponseMixin, generics.GenericAPIView):
 
     **POST**: Send a password reset email to the user if the email exists.
     """
+
     permission_classes = [AllowAny]
     serializer_class = ResetPasswordEmailRequestSerializer
+
     @extend_schema(
         summary="Request Password Reset Email",
         description="Sends a password reset email to the provided email if it exists in the system.",
@@ -420,7 +448,7 @@ class RequestPasswordEmail(CustomResponseMixin, generics.GenericAPIView):
         },
     )
     def post(self, request):
-        """  Handles password reset email requests. """
+        """Handles password reset email requests."""
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
@@ -457,20 +485,31 @@ class CustomRedirect(HttpResponsePermanentRedirect):
 class PasswordTokenCheckAPI(CustomResponseMixin, generics.GenericAPIView):
     """
     API endpoint to verify password reset token and redirect accordingly.
-    
+
     **GET**: Validates the password reset token and returns a redirect URL.
     """
+
     permission_classes = [AllowAny]
     serializer_class = SetNewPasswordSerializer
+
     @extend_schema(
         summary="Check Password Reset Token",
         parameters=[
-            OpenApiParameter(name="uidb64", type=OpenApiTypes.STR, location=OpenApiParameter.PATH, description="Base64 encoded user ID"),
-            OpenApiParameter(name="token", type=OpenApiTypes.STR, location=OpenApiParameter.PATH, description="Password reset token"),
+            OpenApiParameter(
+                name="uidb64",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Base64 encoded user ID",
+            ),
+            OpenApiParameter(
+                name="token",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="Password reset token",
+            ),
         ],
         responses={200: OpenApiResponse(description="Token is valid.")},
     )
-
     def get(self, request, uidb64, token):
         # Use localhost as the default redirect URL during development
         redirect_url = request.GET.get("redirect_url", "http://localhost:3000")
@@ -516,11 +555,13 @@ class PasswordTokenCheckAPI(CustomResponseMixin, generics.GenericAPIView):
 class SetNewPasswordAPIView(CustomResponseMixin, generics.GenericAPIView):
     """
     API endpoint to reset a user's password.
-    
+
     **PATCH**: Accepts new password and resets it.
     """
+
     permission_classes = [AllowAny]
     serializer_class = SetNewPasswordSerializer
+
     @extend_schema(
         summary="Reset Password",
         description="Allows users to set a new password using a valid reset token.",
@@ -528,9 +569,8 @@ class SetNewPasswordAPIView(CustomResponseMixin, generics.GenericAPIView):
         responses={
             200: SuccessResponseSerializer,
             400: ErrorResponseSerializer,
-        },)
-  
-
+        },
+    )
     def patch(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -542,17 +582,19 @@ class SetNewPasswordAPIView(CustomResponseMixin, generics.GenericAPIView):
 class ValidateOTPAndResetPassword(CustomResponseMixin, generics.GenericAPIView):
     """
     API endpoint to validate an OTP and reset the user's password.
-    
+
     **POST**: Validates the OTP and updates the password.
     """
+
     permission_classes = [AllowAny]
     serializer_class = ResetPasswordSerializer
+
     @extend_schema(
         summary="Validate OTP & Reset Password",
         description="Validates a One-Time Password (OTP) and allows the user to reset their password.",
         request=ResetPasswordSerializer,
         responses={
-            200:SuccessResponseSerializer,
+            200: SuccessResponseSerializer,
             400: ErrorDataResponseSerializer,
             404: NotFoundResponseSerializer,
         },
@@ -629,15 +671,18 @@ class LoginView(CustomResponseMixin, APIView):
 
     **POST**: Authenticates a user and returns JWT access & refresh tokens.
     """
+
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
+
     @extend_schema(
         summary="User Login",
         description="Authenticates the user and returns an access & refresh token.",
         request=LoginSerializer,
         responses={
             200: SuccessResponseSerializer,
-                400: ErrorResponseSerializer,},
+            400: ErrorResponseSerializer,
+        },
         examples=[
             OpenApiExample(
                 "Successful Login",
@@ -679,4 +724,3 @@ class LoginView(CustomResponseMixin, APIView):
             message="Invalid data provided",
             data=serializer.errors,
         )
-

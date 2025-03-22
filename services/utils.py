@@ -1,9 +1,11 @@
-from twilio.rest import Client
-from django.conf import settings
-from celery import shared_task
-import logging 
+import logging
 
-logger=logging.getLogger(__name__)
+from celery import shared_task
+from django.conf import settings
+from twilio.rest import Client
+
+logger = logging.getLogger(__name__)
+
 
 @shared_task
 def send_whatsapp_message(to, message):

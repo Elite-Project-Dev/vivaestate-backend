@@ -1,14 +1,15 @@
 import re
 
+import phonenumbers
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.db.models import Q
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 
 from apps.accounts.models import User
-import phonenumbers
-from django.db.models import Q
+
 
 class SignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
@@ -18,28 +19,43 @@ class SignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "username", "password", "first_name", "last_name", "whatsapp_number"]
+        fields = [
+            "email",
+            "username",
+            "password",
+            "first_name",
+            "last_name",
+            "whatsapp_number",
+        ]
 
     def validate(self, attrs):
         username = attrs.get("username")
         email = attrs.get("email")
         whatsapp_number = attrs.get("whatsapp_number")
-        existing_user = User.objects.filter(Q(username=username) | Q(email=email)).first()
-        
+        existing_user = User.objects.filter(
+            Q(username=username) | Q(email=email)
+        ).first()
+
         if existing_user:
             if existing_user.is_active:
-                raise serializers.ValidationError("A user with this email or username already exists and is active.")
-            existing_user.delete() 
+                raise serializers.ValidationError(
+                    "A user with this email or username already exists and is active."
+                )
+            existing_user.delete()
         try:
-            parsed_number = phonenumbers.parse(whatsapp_number, None)  # Auto-detect country
+            parsed_number = phonenumbers.parse(
+                whatsapp_number, None
+            )  # Auto-detect country
             if not phonenumbers.is_valid_number(parsed_number):
-                raise serializers.ValidationError({"whatsapp_number": "Invalid phone number."})
+                raise serializers.ValidationError(
+                    {"whatsapp_number": "Invalid phone number."}
+                )
         except phonenumbers.NumberParseException:
-            raise serializers.ValidationError({"whatsapp_number": "Invalid phone number format."})
-
+            raise serializers.ValidationError(
+                {"whatsapp_number": "Invalid phone number format."}
+            )
 
         return attrs
-
 
 
 class AgentSignupSerializer(serializers.ModelSerializer):
@@ -52,7 +68,7 @@ class AgentSignupSerializer(serializers.ModelSerializer):
     whatsapp_number = serializers.CharField(required=True)
 
     class Meta:
-        model = User # Link to the actual model that this serializer represents
+        model = User  # Link to the actual model that this serializer represents
         fields = [
             "email",
             "username",
@@ -67,22 +83,31 @@ class AgentSignupSerializer(serializers.ModelSerializer):
         username = attrs.get("username")
         email = attrs.get("email")
         whatsapp_number = attrs.get("whatsapp_number")
-        
-        existing_user = User.objects.filter(Q(username=username) | Q(email=email)).first()
+
+        existing_user = User.objects.filter(
+            Q(username=username) | Q(email=email)
+        ).first()
 
         if existing_user:
             if existing_user.is_active:
-                raise serializers.ValidationError("A user with this email or username already exists and is active.")
+                raise serializers.ValidationError(
+                    "A user with this email or username already exists and is active."
+                )
             existing_user.delete()  # Only delete inactive users
         try:
-            parsed_number = phonenumbers.parse(whatsapp_number, None)  # Auto-detect country
+            parsed_number = phonenumbers.parse(
+                whatsapp_number, None
+            )  # Auto-detect country
             if not phonenumbers.is_valid_number(parsed_number):
-                raise serializers.ValidationError({"whatsapp_number": "Invalid phone number."})
+                raise serializers.ValidationError(
+                    {"whatsapp_number": "Invalid phone number."}
+                )
         except phonenumbers.NumberParseException:
-            raise serializers.ValidationError({"whatsapp_number": "Invalid phone number format."})
+            raise serializers.ValidationError(
+                {"whatsapp_number": "Invalid phone number format."}
+            )
 
         return attrs
-
 
 
 class ResetPasswordEmailRequestSerializer(serializers.Serializer):
@@ -96,7 +121,8 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
 
 class ResendEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    
+
+
 class VerifyCodeSerializer(serializers.Serializer):
     email = serializers.EmailField()
     code = serializers.CharField(max_length=6)
@@ -142,16 +168,16 @@ class ResetPasswordSerializer(serializers.Serializer):
         model = User
         fields = ["email", "auth_code", "new_password"]
 
+
 class LoginSerializer(serializers.Serializer):
     email_or_username = serializers.CharField(required=True)
     password = serializers.CharField(write_only=True)
-
 
     def validate(self, data):
         email_or_username = data.get("email_or_username")
         password = data.get("password")
         try:
-            if '@' in email_or_username:
+            if "@" in email_or_username:
                 user = User.objects.get(email=email_or_username)
             else:
                 user = User.objects.get(username=email_or_username)
@@ -162,4 +188,3 @@ class LoginSerializer(serializers.Serializer):
         if not user.is_active:
             raise serializers.ValidationError("User account is disabled.")
         return user
-

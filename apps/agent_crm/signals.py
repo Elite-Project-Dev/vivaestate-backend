@@ -1,10 +1,14 @@
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from .models import Lead
-from services import send_whatsapp_message
 import logging
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from services import send_whatsapp_message
+
+from .models import Lead
+
 logger = logging.getLogger(__name__)
+
 
 @receiver(post_save, sender=Lead)
 def send_lead_notification(sender, instance, created, **kwargs):
@@ -29,7 +33,9 @@ def send_lead_notification(sender, instance, created, **kwargs):
         buyer_phone = instance.buyer.whatsapp_number
         if buyer_phone:  # Ensure the buyer has a phone number
             buyer_whatsapp_message = f"Hello {instance.buyer.first_name},\n"
-            buyer_whatsapp_message += f"Your inquiry for {instance.property} has been received.\n"
+            buyer_whatsapp_message += (
+                f"Your inquiry for {instance.property} has been received.\n"
+            )
             buyer_whatsapp_message += f"Our agent wi ll contact you soon."
             try:
                 send_whatsapp_message(buyer_phone, buyer_whatsapp_message)

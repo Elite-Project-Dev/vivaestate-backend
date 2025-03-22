@@ -1,16 +1,20 @@
+from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.conf import settings
+from django.urls import reverse
+
 from apps.accounts.models import Audit
 from services import DOCUMENT_TYPE_CHOICES, PROPERTY_STATUS_CHOICES, PROPERTY_TYPES
-from django.urls import reverse
+
 
 def upload_property_documents(instance, filename):
     return f"properties/{instance.property.id}/documents/{filename}"
 
 
 class Document(Audit):
-    property = models.ForeignKey('Property', on_delete=models.CASCADE, related_name='documents')
+    property = models.ForeignKey(
+        "Property", on_delete=models.CASCADE, related_name="documents"
+    )
     document_type = models.CharField(
         max_length=50,
         choices=DOCUMENT_TYPE_CHOICES,
@@ -27,32 +31,34 @@ class Property(Audit):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='assigned_properties'
+        related_name="assigned_properties",
     )
     title = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     property_type = models.CharField(max_length=50, choices=PROPERTY_TYPES)
     description = models.TextField(blank=True, null=True)
     latitude = models.DecimalField(
-        max_digits=9, 
-        decimal_places=6, 
-        blank=True, 
-        null=True, 
-        validators=[MinValueValidator(-90.0), MaxValueValidator(90.0)]
+        max_digits=9,
+        decimal_places=6,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(-90.0), MaxValueValidator(90.0)],
     )
     longitude = models.DecimalField(
-        max_digits=9, 
-        decimal_places=6, 
-        blank=True, 
-        null=True, 
-        validators=[MinValueValidator(-180.0), MaxValueValidator(180.0)]
+        max_digits=9,
+        decimal_places=6,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(-180.0), MaxValueValidator(180.0)],
     )
     bedrooms = models.IntegerField(blank=True, null=True)
     bathrooms = models.IntegerField(blank=True, null=True)
     square_feet = models.IntegerField(blank=True, null=True)
-    status = models.CharField(max_length=50, choices=PROPERTY_STATUS_CHOICES, default='available')
-    image = models.ImageField(upload_to='property_images/', blank=True, null=True)
-    video = models.FileField(upload_to='property_videos/', blank=True, null=True)
+    status = models.CharField(
+        max_length=50, choices=PROPERTY_STATUS_CHOICES, default="available"
+    )
+    image = models.ImageField(upload_to="property_images/", blank=True, null=True)
+    video = models.FileField(upload_to="property_videos/", blank=True, null=True)
     for_sale = models.BooleanField(default=False)
     for_rent = models.BooleanField(default=False)
 
@@ -62,6 +68,11 @@ class Property(Audit):
     def is_visible(self):
         """Checks if the agent has an active subscription"""
         # Assuming there's an 'agent' attribute related to this property
-        return self.user.subscription.active if hasattr(self, 'agent') and hasattr(self.agent, 'subscription') else False
+        return (
+            self.user.subscription.active
+            if hasattr(self, "agent") and hasattr(self.agent, "subscription")
+            else False
+        )
+
     def get_absolute_url(self):
-       return reverse("property-detail", kwargs={"pk": self.pk})
+        return reverse("property-detail", kwargs={"pk": self.pk})

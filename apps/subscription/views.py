@@ -7,30 +7,32 @@ import requests
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from drf_spectacular.utils import extend_schema
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from requests.exceptions import ConnectionError, RequestException, Timeout
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from requests.exceptions import ConnectionError, Timeout, RequestException
 
+from apps.accounts.permission import IsAgent, IsSuperUser
 from services import CustomResponseMixin
-from drf_yasg.utils import swagger_auto_schema
-from drf_spectacular.utils import extend_schema
-from drf_yasg import openapi
 
 from .models import Subscription, SubscriptionPlan
 from .serializers import SubscriptionPlanSerializer, SubscriptionSerializer
 from .utils import create_payment_plan
-from apps.accounts.permission import IsSuperUser, IsAgent
-from rest_framework.permissions import IsAuthenticated
+
 
 class SubscriptionPlanViewSet(viewsets.ModelViewSet, CustomResponseMixin):
     """
     API endpoint for managing subscription plans.
     """
+
     queryset = SubscriptionPlan.objects.all()
     serializer_class = SubscriptionPlanSerializer
-    permission_classes =[IsSuperUser, IsAuthenticated]
+    permission_classes = [IsSuperUser, IsAuthenticated]
+
     @extend_schema(
         description="Create a new subscription plan and register it with Flutterwave.",
         responses={201: SubscriptionPlanSerializer()},
@@ -45,29 +47,29 @@ class SubscriptionPlanViewSet(viewsets.ModelViewSet, CustomResponseMixin):
                 name=instance.name,
                 amount=int(instance.amount),
                 interval=instance.interval,
-                duration=instance.duration
+                duration=instance.duration,
             )
             instance.flutterwave_plan_id = plan_id
             instance.save()
         except ConnectionError:
             return self.custom_response(
                 message="Failed to connect to Flutterwave API. Please check your internet connection.",
-                status=status.HTTP_503_SERVICE_UNAVAILABLE
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         except Timeout:
             return self.custom_response(
                 message="Flutterwave API request timed out. Try again later.",
-                status=status.HTTP_504_GATEWAY_TIMEOUT
+                status=status.HTTP_504_GATEWAY_TIMEOUT,
             )
         except RequestException as e:
             return self.custom_response(
                 message=f"An error occurred: {str(e)}",
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             return self.custom_response(
                 message=f"Create Subscription Failed: {str(e)}",
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
@@ -75,6 +77,7 @@ class SubscriptionViewSet(viewsets.ModelViewSet, CustomResponseMixin):
     """
     API endpoint for managing subscriptions.
     """
+
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     permission_classes = [IsAuthenticated, IsAgent]
@@ -87,7 +90,9 @@ class SubscriptionViewSet(viewsets.ModelViewSet, CustomResponseMixin):
             type=openapi.TYPE_OBJECT,
             required=["plan_id"],
             properties={
-                "plan_id": openapi.Schema(type=openapi.TYPE_STRING, description="ID of the subscription plan"),
+                "plan_id": openapi.Schema(
+                    type=openapi.TYPE_STRING, description="ID of the subscription plan"
+                ),
             },
         ),
     )
@@ -118,24 +123,32 @@ class SubscriptionViewSet(viewsets.ModelViewSet, CustomResponseMixin):
                 },
             )
             if response.status_code in [200, 201]:
-                return Response(response.json().get("data", {}).get("link"), status=status.HTTP_200_OK)
+                return Response(
+                    response.json().get("data", {}).get("link"),
+                    status=status.HTTP_200_OK,
+                )
             else:
                 return self.custom_response(
                     message=f"Payment initiation failed: {response.json().get('message', 'Unknown error')}",
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         except SubscriptionPlan.DoesNotExist:
-            return self.custom_response(message="Plan not found", status=status.HTTP_404_NOT_FOUND)
+            return self.custom_response(
+                message="Plan not found", status=status.HTTP_404_NOT_FOUND
+            )
 
 
 @csrf_exempt
-def flutterwave_webhook(request):    # it can be sent when it o local production
+def flutterwave_webhook(request):  # it can be sent when it o local production
     """
     Webhook for handling payment updates from Flutterwave.
     """
     if request.method == "POST":
         signature = request.headers.get("verif-hash")
-        if not signature or signature != sha512(settings.FLUTTERWAVE_SECRET_KEY.encode()).hexdigest():
+        if (
+            not signature
+            or signature != sha512(settings.FLUTTERWAVE_SECRET_KEY.encode()).hexdigest()
+        ):
             return JsonResponse({"status": "invalid signature"}, status=400)
 
         payload = json.loads(request.body)
@@ -156,9 +169,13 @@ def flutterwave_webhook(request):    # it can be sent when it o local production
                 if created:
                     plan = subscription.plan
                     if plan.interval == "monthly":
-                        subscription.end_date = subscription.start_date + timedelta(days=30 * plan.duration)
+                        subscription.end_date = subscription.start_date + timedelta(
+                            days=30 * plan.duration
+                        )
                     elif plan.interval == "yearly":
-                        subscription.end_date = subscription.start_date + timedelta(days=365 * plan.duration)
+                        subscription.end_date = subscription.start_date + timedelta(
+                            days=365 * plan.duration
+                        )
                     subscription.save()
 
                 return JsonResponse({"status": "success"})

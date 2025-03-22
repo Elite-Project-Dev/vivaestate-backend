@@ -9,10 +9,12 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+
 import os
-from pathlib import Path
-import redis
 import ssl
+from pathlib import Path
+
+import redis
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -89,7 +91,7 @@ WSGI_APPLICATION = "drf_project.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE":'django.db.backends.postgresql',
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": config("DATABASE_NAME"),
         "USER": config("DATABASE_USER"),
         "PASSWORD": config("DATABASE_PASSWORD"),
@@ -97,8 +99,6 @@ DATABASES = {
         "PORT": config("DATABASE_PORT", default="5432"),
     }
 }
-
-
 
 
 # EMAIL
@@ -162,19 +162,19 @@ TWILIO_WHATSAPP_NUMBER = config("TWILIO_WHATSAPP_NUMBER")
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "PAGE_SIZE": 25,
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    'DEFAULT_PARSER_CLASSES': [
-        'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser',
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
     ],
 }
 
@@ -183,50 +183,49 @@ SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
 AUTH_USER_MODEL = "accounts.User"
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=4),  # Access token lifetime (1 hour)
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Refresh token lifetime (7 days)
-    'ROTATE_REFRESH_TOKENS': False,  # Set to True if you want to rotate refresh tokens on every access token refresh
-    'BLACKLIST_AFTER_ROTATION': True,  # Set to True if you want to blacklist refresh tokens after use
-    'ALGORITHM': 'HS256',  # Algorithm used for signing tokens
-    'SIGNING_KEY': 'your-secret-key',  # Secret key for signing the tokens
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=4),  # Access token lifetime (1 hour)
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Refresh token lifetime (7 days)
+    "ROTATE_REFRESH_TOKENS": False,  # Set to True if you want to rotate refresh tokens on every access token refresh
+    "BLACKLIST_AFTER_ROTATION": True,  # Set to True if you want to blacklist refresh tokens after use
+    "ALGORITHM": "HS256",  # Algorithm used for signing tokens
+    "SIGNING_KEY": "your-secret-key",  # Secret key for signing the tokens
 }
 
 
 # Celery Configuratiocn
-CELERY_BROKER_URL='redis://127.0.0.1:6379/0'
-CELERY_RESULT_BACKEND=CELERY_BROKER_URL
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-OPENAI_API_KEY=config("OPENAI_API_KEY")
+OPENAI_API_KEY = config("OPENAI_API_KEY")
 
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'debug.log',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "debug.log",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
         },
     },
 }
