@@ -1,5 +1,8 @@
 from apps.ai_assistant.models import PropertyEmbedding
 from service import generate_embeddling
+import logging
+
+logger = logging.getLogger(__name__)
 
 def save_property_embeddings(property_instance, chunks):
     """
@@ -13,3 +16,5 @@ def save_property_embeddings(property_instance, chunks):
                 chunk=chunk,
                 embedding=embedding
             )
+        else:
+            logger.error(f"error in property embedding")
