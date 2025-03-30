@@ -39,8 +39,6 @@ class LeadViewSet(
         Admin users can see all leads, while agents only see assigned leads.
         """
         user = self.request.user
-        if not user.is_authenticated:
-            return Lead.objects.none()  # Return an empty queryset for anonymous users
         if getattr(user, "is_admin", False):
             return Lead.objects.all().order_by("-created_at")
         return Lead.objects.filter(assigned_agent=user).order_by("-created_at")

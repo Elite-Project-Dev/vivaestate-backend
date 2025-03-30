@@ -77,7 +77,7 @@ class PropertyViewSet(CustomResponseModelViewSet):
 
     def get_permissions(self):
         """Assign permissions based on request method"""
-        if self.request.method == "GET":
+        if self.action in ["list", "retrieve", "nearby"]:
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]

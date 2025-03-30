@@ -8,12 +8,14 @@ from services import CustomResponseMixin
 from .models import PropertyChatHistory, PropertyEmbedding
 from .serializers import PropertyChatSerializer
 
+import logging
 
+logger = logging.getLogger(__name__)
 class PropertyChatAPIView(APIView, CustomResponseMixin):
     def post(self, request, property_id):
         serializer = PropertyChatSerializer(data=request.data)
         if serializer.is_valid():
-            question = serializer.validated_data
+            question = serializer.validated_data["question"]
             # This Fetch embeddings for this property
             embeddings_qs = PropertyEmbedding.objects.filter(property_id=property_id)
             if not embeddings_qs.exists():
@@ -70,10 +72,10 @@ class PropertyChatAPIView(APIView, CustomResponseMixin):
 
     def generate_embedding(self, text, model="text-embedding-ada-002"):
         try:
-            response = openai.Embedding.create(input=text, model=model)
+            response = openai.embeddings.create()(input=text, model=model)
             return response["data"][0]["embedding"]
         except Exception as e:
-            print(f"Embedding error: {e}")
+            logger.error(f"Embedding error: {e}")
             return None
 
     def cosine_similarity(self, vec1, vec2):

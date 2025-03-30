@@ -42,13 +42,16 @@ class SubscriptionPlanViewSet(viewsets.ModelViewSet, CustomResponseMixin):
         Handles the creation of a subscription plan and integrates it with Flutterwave.
         """
         try:
-            instance = serializer.save()
+            instance = serializer.save(commit=False)  # dont save yet
             plan_id = create_payment_plan(
                 name=instance.name,
                 amount=int(instance.amount),
                 interval=instance.interval,
                 duration=instance.duration,
             )
+            if not plan_id:
+               raise Exception("Failed to get plan ID from Flutterwave")
+
             instance.flutterwave_plan_id = plan_id
             instance.save()
         except ConnectionError:
@@ -143,6 +146,9 @@ def flutterwave_webhook(request):  # it can be sent when it o local production
     """
     Webhook for handling payment updates from Flutterwave.
     """
+    if request.method != "POST":
+        return JsonResponse({"status": "error"}, status=400)
+
     if request.method == "POST":
         signature = request.headers.get("verif-hash")
         if (

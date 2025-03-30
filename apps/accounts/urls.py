@@ -17,12 +17,7 @@ urlpatterns = [
     path(
         "resend-auth-code/",
         ResendEmailView.as_view(),
-        name="resend_auth_code",
-    ),
-    path(
-        "password-reset/<uidb64>/<token>/",
-        PasswordTokenCheckAPI.as_view(),
-        name="password-reset-confirm",
+        name="resend-auth-code",
     ),
     path(
         "password-reset-confirm/<str:uidb64>/<str:token>/",
