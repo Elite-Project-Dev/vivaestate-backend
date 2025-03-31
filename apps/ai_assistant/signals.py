@@ -1,10 +1,8 @@
-import fitz  # PyMuPDF
 import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .ai_functions.helper_function import process_property_document
 from apps.properties.models import Document
-from apps.ai_assistant.models import PropertyEmbedding
 from .ai_functions.pdf_extractor import extract_text_from_pdf
 import os
 
