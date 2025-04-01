@@ -11,10 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
-import ssl
 from pathlib import Path
 
-import redis
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,12 +34,18 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost", "vivaestate.localhost.com"]
 
 
 INSTALLED_APPS = [
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.facebook",
     "rest_framework",
     "drf_yasg",
     "drf_spectacular",
@@ -63,6 +67,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "drf_project.urls"
@@ -78,6 +83,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.request",
             ],
         },
     },
@@ -229,3 +235,47 @@ LOGGING = {
         },
     },
 }
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+SITE_ID = 1
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    },
+     "facebook": {
+            "METHOD": "oauth2",  # Set to 'js_sdk' to use the Facebook connect SDK
+            "SCOPE": ["email", "public_profile"],
+            "AUTH_PARAMS": {"auth_type": "reauthenticate"},
+            "INIT_PARAMS": {"cookie": True},
+            "FIELDS": [
+                "id",
+                "first_name",
+                "last_name",
+                "middle_name",
+                "name",
+                "name_format",
+                "picture",
+                "short_name",
+            ],
+            "EXCHANGE_TOKEN": True,
+            #'LOCALE_FUNC': 'path.to.callable',
+            "VERIFIED_EMAIL": False,
+            "VERSION": "v13.0",
+            "GRAPH_API_URL": "https://graph.facebook.com/v13.0",
+        },
+}
+
+#LOGIN_REDIRECT_URL = "property/"

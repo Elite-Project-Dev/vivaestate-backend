@@ -35,7 +35,9 @@ schema_view = get_schema_view(
 )
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("accounts/", include("apps.accounts.urls")),
+    path("auth/", include("apps.accounts.urls")),
+    path("accounts/", include('allauth.urls')),
+   # path("auth/registration/", include("dj_rest_auth.registration.urls")),
     path("property/", include("apps.properties.urls")),
     path("social/", include("apps.social.urls")),
     path("subscription/", include("apps.subscription.urls")),
