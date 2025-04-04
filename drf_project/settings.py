@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost", "vivaestate.localhost.com"]
 INSTALLED_APPS = [
     "allauth",
     "allauth.account",
+    'rest_framework.authtoken',
     "allauth.socialaccount",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.facebook",
     "rest_framework",
+    'dj_rest_auth',
     "drf_yasg",
     "drf_spectacular",
     "drf_spectacular_sidecar",
@@ -60,6 +62,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "allauth.account.middleware.AccountMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -67,7 +70,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "allauth.account.middleware.AccountMiddleware",
+
 ]
 
 ROOT_URLCONF = "drf_project.urls"
@@ -171,8 +174,6 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
-    "PAGE_SIZE": 25,
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
@@ -245,15 +246,27 @@ SITE_ID = 1
 
 
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
+   "google": {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        "APPS": [
+            {
+                "client_id":config("CLIENT_ID"),
+                "secret": config("SECRET"),
+                "key": "",
+                "settings": {
+                    # You can fine tune these settings per app:
+                    "scope": [
+                        "profile",
+                        "email",
+                    ],
+                    "auth_params": {
+                        "access_type": "online",
+                    },
+                },
+            },
         ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        },
-        'OAUTH_PKCE_ENABLED': True,
     },
      "facebook": {
             "METHOD": "oauth2",  # Set to 'js_sdk' to use the Facebook connect SDK
@@ -278,4 +291,6 @@ SOCIALACCOUNT_PROVIDERS = {
         },
 }
 
-#LOGIN_REDIRECT_URL = "property/"
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+LOGIN_REDIRECT_URL = 'swagger'
