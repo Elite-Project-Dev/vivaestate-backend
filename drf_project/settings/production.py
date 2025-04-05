@@ -4,8 +4,8 @@ from decouple import config
 
 
 DEBUG = False
+ALLOWED_HOSTS = ['viva-estate-backend.onrender.com', 'localhost', '127.0.0.1']
 
-ALLOWED_HOSTS =["https://viva-estate-backend.onrender.com/"]
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
