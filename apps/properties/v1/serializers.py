@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from services import PROPERTY_STATUS_CHOICES, PROPERTY_TYPES
 
-from .models import Document, Property
+from ..models import Document, Property
 
 
 class DocumentSerializer(serializers.ModelSerializer):

@@ -19,9 +19,9 @@ from rest_framework.response import Response
 from apps.accounts.permission import IsAgent, IsSuperUser
 from services import CustomResponseMixin
 
-from .models import Subscription, SubscriptionPlan
+from ..models import Subscription, SubscriptionPlan
 from .serializers import SubscriptionPlanSerializer, SubscriptionSerializer
-from .utils import create_payment_plan
+from ..utils import create_payment_plan
 
 
 class SubscriptionPlanViewSet(viewsets.ModelViewSet, CustomResponseMixin):

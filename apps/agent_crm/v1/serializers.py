@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.properties.models import Property
 
-from .models import Lead
+from ..models import Lead
 
 
 class LeadSerializer(serializers.ModelSerializer):

@@ -21,7 +21,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.models import AgentProfile, User
-from apps.accounts.serializers import (
+from apps.accounts.v1.serializers import (
     AgentSignupSerializer,
     LoginSerializer,
     PasswordResetTokenGenerator,

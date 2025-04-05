@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Favourite, Property
+from ..models import Favourite, Property
 
 
 class PropertySerializer(serializers.ModelSerializer):

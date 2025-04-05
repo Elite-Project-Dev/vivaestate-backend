@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from apps.properties.models import Property
 from services import CustomResponseMixin, EmailService
 
-from .models import Lead
+from ..models import Lead
 from .serializers import LeadSerializer
 
 

@@ -3,19 +3,17 @@ from datetime import timedelta
 
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
+
 
 from apps.accounts.permission import HasActiveSubscription, IsAgent
 from services import CustomResponseMixin
 
-from .models import Document, Property
+from ..models import Document, Property
 from .serializers import DocumentSerializer, PropertySerializer
 
 

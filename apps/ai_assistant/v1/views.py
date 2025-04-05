@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from services import CustomResponseMixin
 
-from .models import PropertyChatHistory, PropertyEmbedding
+from ..models import PropertyChatHistory, PropertyEmbedding
 from .serializers import PropertyChatSerializer
 
 import logging
