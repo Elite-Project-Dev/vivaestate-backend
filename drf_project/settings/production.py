@@ -1,6 +1,7 @@
 from .base import *
 
 DEBUG = False
+
 ALLOWED_HOSTS =['https://viva-estate-backend.onrender.com']
 LOGGING = {
     "version": 1,
