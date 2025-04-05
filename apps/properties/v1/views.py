@@ -9,7 +9,6 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-
 from apps.accounts.permission import HasActiveSubscription, IsAgent
 from services import CustomResponseMixin
 

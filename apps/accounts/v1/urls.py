@@ -2,13 +2,13 @@ from django.urls import path
 
 from .views import (
     AgentSignupView,
+    CompleteSignupView,
     EmailVerifyView,
     LoginView,
     PasswordTokenCheckAPI,
     ResendEmailView,
     UserSignupView,
     VerifyCodeView,
-    CompleteSignupView,
 )
 
 urlpatterns = [

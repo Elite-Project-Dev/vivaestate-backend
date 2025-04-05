@@ -1,6 +1,6 @@
 import logging
 import os
-from rest_framework.permissions import IsAuthenticated
+
 from django.contrib.auth.backends import BaseBackend
 from django.core.cache import cache
 from django.core.signing import BadSignature, Signer
@@ -16,13 +16,14 @@ from drf_spectacular.utils import (
 )
 from drf_yasg import openapi
 from rest_framework import generics, parsers, status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.models import AgentProfile, User
 from apps.accounts.v1.serializers import (
     AgentSignupSerializer,
+    CompleteSignUp,
     LoginSerializer,
     PasswordResetTokenGenerator,
     ResendEmailSerializer,
@@ -31,7 +32,6 @@ from apps.accounts.v1.serializers import (
     SetNewPasswordSerializer,
     SignupSerializer,
     VerifyCodeSerializer,
-    CompleteSignUp,
 )
 from services import (
     CreateResponseSerializer,
@@ -727,12 +727,18 @@ class LoginView(CustomResponseMixin, APIView):
 
 class CompleteSignupView(CustomResponseMixin, APIView):
     """Api endpoint for user to complete signup after social sign up"""
+
     serializer_class = CompleteSignUp
     permission_classes = [IsAuthenticated]
+
     def put(self, request, *argd, **kwargs):
         user = request.user
-        serializer = CompleteSignUp(user, data=request.data , partial=True)
+        serializer = CompleteSignUp(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return self.custom_response(message="Signup completed successfully", status=status.HTTP_201_CREATED)
-        return self.custom_response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST )
+            return self.custom_response(
+                message="Signup completed successfully", status=status.HTTP_201_CREATED
+            )
+        return self.custom_response(
+            data=serializer.errors, status=status.HTTP_400_BAD_REQUEST
+        )

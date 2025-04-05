@@ -39,7 +39,7 @@ class LeadViewSet(
         Admin users can see all leads, while agents only see assigned leads.
         """
         user = self.request.user
-        if getattr(self, 'swagger_fake_view', False):
+        if getattr(self, "swagger_fake_view", False):
             return Lead.objects.none()
         if getattr(user, "is_admin", False):
             return Lead.objects.all().order_by("-created_at")
@@ -81,7 +81,7 @@ class LeadViewSet(
         try:
             email_service = EmailService()
             email_service.send_agent_lead_notification(request, property_id)
-            email_service.comfirmation_of_sent_lead(request, property_id)  
+            email_service.comfirmation_of_sent_lead(request, property_id)
         except Exception as e:
             return self.custom_response(
                 message=f"Failed to send email: {str(e)}",

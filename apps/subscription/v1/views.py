@@ -20,8 +20,8 @@ from apps.accounts.permission import IsAgent, IsSuperUser
 from services import CustomResponseMixin
 
 from ..models import Subscription, SubscriptionPlan
-from .serializers import SubscriptionPlanSerializer, SubscriptionSerializer
 from ..utils import create_payment_plan
+from .serializers import SubscriptionPlanSerializer, SubscriptionSerializer
 
 
 class SubscriptionPlanViewSet(viewsets.ModelViewSet, CustomResponseMixin):
@@ -50,7 +50,7 @@ class SubscriptionPlanViewSet(viewsets.ModelViewSet, CustomResponseMixin):
                 duration=instance.duration,
             )
             if not plan_id:
-               raise Exception("Failed to get plan ID from Flutterwave")
+                raise Exception("Failed to get plan ID from Flutterwave")
 
             instance.flutterwave_plan_id = plan_id
             instance.save()

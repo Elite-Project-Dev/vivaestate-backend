@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,7 +35,7 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost", "vivaestate.localhost.com"]
 INSTALLED_APPS = [
     "allauth",
     "allauth.account",
-    'rest_framework.authtoken',
+    "rest_framework.authtoken",
     "allauth.socialaccount",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -48,7 +47,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.facebook",
     "rest_framework",
-    'dj_rest_auth',
+    "dj_rest_auth",
     "drf_yasg",
     "drf_spectacular",
     "drf_spectacular_sidecar",
@@ -70,7 +69,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
 ]
 
 ROOT_URLCONF = "drf_project.urls"
@@ -246,13 +244,13 @@ SITE_ID = 1
 
 
 SOCIALACCOUNT_PROVIDERS = {
-   "google": {
+    "google": {
         # For each OAuth based provider, either add a ``SocialApp``
         # (``socialaccount`` app) containing the required client
         # credentials, or list them here:
         "APPS": [
             {
-                "client_id":config("CLIENT_ID"),
+                "client_id": config("CLIENT_ID"),
                 "secret": config("SECRET"),
                 "key": "",
                 "settings": {
@@ -268,29 +266,29 @@ SOCIALACCOUNT_PROVIDERS = {
             },
         ],
     },
-     "facebook": {
-            "METHOD": "oauth2",  # Set to 'js_sdk' to use the Facebook connect SDK
-            "SCOPE": ["email", "public_profile"],
-            "AUTH_PARAMS": {"auth_type": "reauthenticate"},
-            "INIT_PARAMS": {"cookie": True},
-            "FIELDS": [
-                "id",
-                "first_name",
-                "last_name",
-                "middle_name",
-                "name",
-                "name_format",
-                "picture",
-                "short_name",
-            ],
-            "EXCHANGE_TOKEN": True,
-            #'LOCALE_FUNC': 'path.to.callable',
-            "VERIFIED_EMAIL": False,
-            "VERSION": "v13.0",
-            "GRAPH_API_URL": "https://graph.facebook.com/v13.0",
-        },
+    "facebook": {
+        "METHOD": "oauth2",  # Set to 'js_sdk' to use the Facebook connect SDK
+        "SCOPE": ["email", "public_profile"],
+        "AUTH_PARAMS": {"auth_type": "reauthenticate"},
+        "INIT_PARAMS": {"cookie": True},
+        "FIELDS": [
+            "id",
+            "first_name",
+            "last_name",
+            "middle_name",
+            "name",
+            "name_format",
+            "picture",
+            "short_name",
+        ],
+        "EXCHANGE_TOKEN": True,
+        #'LOCALE_FUNC': 'path.to.callable',
+        "VERIFIED_EMAIL": False,
+        "VERSION": "v13.0",
+        "GRAPH_API_URL": "https://graph.facebook.com/v13.0",
+    },
 }
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-LOGIN_REDIRECT_URL = 'swagger'
+LOGIN_REDIRECT_URL = "swagger"
