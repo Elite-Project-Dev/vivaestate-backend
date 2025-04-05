@@ -1,18 +1,21 @@
 from .base import *
+import sys
+
 
 DEBUG = False
 
 ALLOWED_HOSTS =['https://viva-estate-backend.onrender.com']
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
         },
     },
-    "root": {
-        "handlers": ["console"],
-        "level": "INFO",
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
     },
 }
