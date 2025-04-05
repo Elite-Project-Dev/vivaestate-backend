@@ -1,26 +1,19 @@
 from .base import *
-from decouple import config
+
 DEBUG = False
-ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS")
+ALLOWED_HOSTS =['https://viva-estate-backend.onrender.com']
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
-            "style": "{",
-        },
-    },
     "handlers": {
         "file": {
             "level": "ERROR",
             "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs/errors.log",
-            "formatter": "verbose",
+            "filename": "logs/django_errors.log",
         },
     },
     "loggers": {
-        "contact_us": {
+        "django": {
             "handlers": ["file"],
             "level": "ERROR",
             "propagate": True,
