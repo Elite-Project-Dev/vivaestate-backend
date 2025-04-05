@@ -1,8 +1,6 @@
 import logging
 import os
-
-from django.conf import settings
-from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.backends import BaseBackend
 from django.core.cache import cache
 from django.core.signing import BadSignature, Signer
@@ -33,6 +31,7 @@ from apps.accounts.serializers import (
     SetNewPasswordSerializer,
     SignupSerializer,
     VerifyCodeSerializer,
+    CompleteSignUp,
 )
 from services import (
     CreateResponseSerializer,
@@ -724,3 +723,16 @@ class LoginView(CustomResponseMixin, APIView):
             message="Invalid data provided",
             data=serializer.errors,
         )
+
+
+class CompleteSignupView(CustomResponseMixin, APIView):
+    """Api endpoint for user to complete signup after social sign up"""
+    serializer_class = CompleteSignUp
+    permission_classes = [IsAuthenticated]
+    def put(self, request, *argd, **kwargs):
+        user = request.user
+        serializer = CompleteSignUp(user, data=request.data , partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return self.custom_response(message="Signup completed successfully", status=status.HTTP_201_CREATED)
+        return self.custom_response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST )

@@ -109,6 +109,27 @@ class AgentSignupSerializer(serializers.ModelSerializer):
 
         return attrs
 
+class CompleteSignUp(serializers.Serializer):
+    agent = serializers.BooleanField(source="is_agent", required=True)
+    whatsapp_number = serializers.CharField(required=True)   
+    
+    def validate(self, attrs):
+        whatsapp_number = attrs.get("whatsapp_number")
+        try:
+            parsed_number = phonenumbers.parse(
+                whatsapp_number, None
+            )
+            if not phonenumbers.is_valid_number(parsed_number):
+                raise serializers.ValidationError(
+                    {"whatsapp_number": "Invalid phone number"}
+                )
+        except phonenumbers.NumberParseException:
+            raise serializers.ValidationError(
+                {"whatsapp_number": "Invalid phone number format."}
+            )
+        return attrs
+    
+
 
 class ResetPasswordEmailRequestSerializer(serializers.Serializer):
     email = serializers.EmailField(min_length=2)

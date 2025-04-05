@@ -8,11 +8,13 @@ from .views import (
     ResendEmailView,
     UserSignupView,
     VerifyCodeView,
+    CompleteSignupView,
 )
 
 urlpatterns = [
     path("agent/signup/", AgentSignupView.as_view(), name="agent-signup"),
     path("user/signup/", UserSignupView.as_view(), name="user-signup"),
+    path("complete-signup", CompleteSignupView.as_view(), name="complete-signup"),
     path("email-verify/", EmailVerifyView.as_view(), name="email-verify"),
     path(
         "resend-auth-code/",

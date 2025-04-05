@@ -34,14 +34,15 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 urlpatterns = [
+    path ("", schema_view.with_ui("swagger", cache_timeout=0), name="swagger-ui" ),
     path("admin/", admin.site.urls),
-    path("auth/", include("apps.accounts.urls")),
-    path("accounts/", include('allauth.urls')), 
+    path("account/", include("apps.accounts.urls")),
+    path("social-auth/", include('allauth.urls')), 
     path("property/", include("apps.properties.urls")),
     path("social/", include("apps.social.urls")),
     path("subscription/", include("apps.subscription.urls")),
     path("leads/", include("apps.agent_crm.urls")),
-    path("ai_assistant", include("apps.ai_assistant.urls")),
+    path("ai-assistant", include("apps.ai_assistant.urls")),
     path(
         "swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="swagger-ui"
     ),
