@@ -1,6 +1,7 @@
 from .base import *
 import sys
-
+from decouple import config
+import dj_database_url
 
 DEBUG = False
 
@@ -18,4 +19,11 @@ LOGGING = {
         'handlers': ['console'],
         'level': 'INFO',
     },
+}
+
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=config("DATABASE_URL")  # Uses the Render database URL
+    )
 }
