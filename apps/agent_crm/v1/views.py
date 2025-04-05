@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from apps.properties.models import Property
 from services import CustomResponseMixin, EmailService
 
-from .models import Lead
+from ..models import Lead
 from .serializers import LeadSerializer
 
 
@@ -39,6 +39,8 @@ class LeadViewSet(
         Admin users can see all leads, while agents only see assigned leads.
         """
         user = self.request.user
+        if getattr(self, "swagger_fake_view", False):
+            return Lead.objects.none()
         if getattr(user, "is_admin", False):
             return Lead.objects.all().order_by("-created_at")
         return Lead.objects.filter(assigned_agent=user).order_by("-created_at")
@@ -76,12 +78,10 @@ class LeadViewSet(
             )
         assigned_agent = property_obj.assigned_agent
         lead = serializer.save(buyer=request.user, assigned_agent=assigned_agent)
-
-        #  Send email notifications (PASS PROPERTY ID, NOT OBJECT)
         try:
             email_service = EmailService()
-            email_service.send_agent_lead_notification(request, property_id)  #  Fixed
-            email_service.comfirmation_of_sent_lead(request, property_id)  #  Fixed
+            email_service.send_agent_lead_notification(request, property_id)
+            email_service.comfirmation_of_sent_lead(request, property_id)
         except Exception as e:
             return self.custom_response(
                 message=f"Failed to send email: {str(e)}",

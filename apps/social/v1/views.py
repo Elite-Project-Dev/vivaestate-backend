@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from apps.properties.models import Property
 from services import CustomResponseMixin, EmailService
 
-from .models import Favourite
+from ..models import Favourite
 from .serializers import PropertySerializer
 
 

@@ -1,7 +1,9 @@
+import re
+
 import pdfplumber
 import pytesseract
 from pdf2image import convert_from_path
-import re
+
 
 def extract_text_from_pdf(pdf_path):
     """
@@ -19,12 +21,16 @@ def extract_text_from_pdf(pdf_path):
     if not full_text.strip():
         return extract_text_from_scanned_pdf(pdf_path)
     return clean_text(full_text)
+
+
 def extract_text_from_scanned_pdf(pdf_path):
     """
     uses orc to  extract text from pdf"""
     pages = convert_from_path(pdf_path)
     text = [pytesseract.image_to_string(page) for page in pages]
     return clean_text("\n".join(text))
+
+
 def clean_text(text):
     """
     Cleans extracted text by removing extra spaces, newlines, non-ASCII characters,

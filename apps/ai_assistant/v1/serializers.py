@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import PropertyChatHistory, PropertyEmbedding
+from ..models import PropertyChatHistory, PropertyEmbedding
 
 
 class PropertyEmbeddingSerializer(serializers.ModelSerializer):

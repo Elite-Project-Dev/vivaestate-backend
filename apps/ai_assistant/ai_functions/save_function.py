@@ -1,9 +1,11 @@
 import logging
 
-from .embedding_service import generate_embeddling
 from apps.ai_assistant.models import PropertyEmbedding
 
+from .embedding_service import generate_embeddling
+
 logger = logging.getLogger(__name__)
+
 
 def save_property_embeddings(property_instance, chunks):
     """
@@ -12,8 +14,8 @@ def save_property_embeddings(property_instance, chunks):
     for chunk in chunks:
         try:
             if not chunk:
-               logger.warning("Skipping empty chunck")
-               continue
+                logger.warning("Skipping empty chunck")
+                continue
 
             embedding = generate_embeddling(chunk)
             if embedding:

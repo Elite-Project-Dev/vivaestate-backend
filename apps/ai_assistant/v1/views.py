@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import openai
 from rest_framework import status
@@ -5,12 +7,12 @@ from rest_framework.views import APIView
 
 from services import CustomResponseMixin
 
-from .models import PropertyChatHistory, PropertyEmbedding
+from ..models import PropertyChatHistory, PropertyEmbedding
 from .serializers import PropertyChatSerializer
 
-import logging
-
 logger = logging.getLogger(__name__)
+
+
 class PropertyChatAPIView(APIView, CustomResponseMixin):
     def post(self, request, property_id):
         serializer = PropertyChatSerializer(data=request.data)
