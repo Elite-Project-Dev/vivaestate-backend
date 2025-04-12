@@ -12,8 +12,8 @@ from rest_framework.response import Response
 from apps.accounts.permission import HasActiveSubscription, IsAgent
 from services import CustomResponseMixin
 
-from ..models import Document, Property
-from .serializers import DocumentSerializer, PropertySerializer
+from ..models import Document, Property, PropertyLocation , PropertyImage, PropertyVideo
+from .serializers import DocumentSerializer, PropertySerializer , PropertyImageSerializer , PropertyVideoSerializer , PropertyLocationSerializer
 
 
 class CustomResponseModelViewSet(CustomResponseMixin, viewsets.ModelViewSet):
@@ -23,7 +23,7 @@ class CustomResponseModelViewSet(CustomResponseMixin, viewsets.ModelViewSet):
         """Retrieve a list of properties"""
         response = super().list(request, *args, **kwargs)
         return self.custom_response(
-            message="Properties fetched successfully",
+            message="Properties data fetched successfully",
             data=response.data,
             status=status.HTTP_200_OK,
         )
@@ -33,7 +33,7 @@ class CustomResponseModelViewSet(CustomResponseMixin, viewsets.ModelViewSet):
         response = super().retrieve(request, *args, **kwargs)
         return self.custom_response(
             status=status.HTTP_200_OK,
-            message="Property fetched successfully",
+            message="Property  data fetched successfully",
             data=response.data,
         )
 
@@ -42,7 +42,7 @@ class CustomResponseModelViewSet(CustomResponseMixin, viewsets.ModelViewSet):
         response = super().create(request, *args, **kwargs)
         return self.custom_response(
             status=status.HTTP_201_CREATED,
-            message="Property created successfully",
+            message="Property data created successfully",
             data=response.data,
         )
 
@@ -51,7 +51,7 @@ class CustomResponseModelViewSet(CustomResponseMixin, viewsets.ModelViewSet):
         response = super().update(request, *args, **kwargs)
         return self.custom_response(
             status=status.HTTP_200_OK,
-            message="Property updated successfully",
+            message="Property  data updated successfully",
             data=response.data,
         )
 
@@ -59,7 +59,7 @@ class CustomResponseModelViewSet(CustomResponseMixin, viewsets.ModelViewSet):
         """Delete a property"""
         super().destroy(request, *args, **kwargs)
         return self.custom_response(
-            status=status.HTTP_204_NO_CONTENT, message="Property deleted successfully"
+            status=status.HTTP_204_NO_CONTENT, message="Property data deleted successfully"
         )
 
 
@@ -140,19 +140,11 @@ class PropertyViewSet(CustomResponseModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return self.custom_response(data=serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=["get"])
-    def documents(self, request, pk=None):
-        property = self.get_object()
-        documents = property.documents.all()
-        serializer = DocumentSerializer(documents, many=True)
-        return self.custom_response(data=serializer.data)
-
     def perform_create(self, serializer):
         serializer.save(assigned_agent=self.request.user)
 
 
-class DocumentViewSet(viewsets.ModelViewSet):
+class DocumentViewSet(CustomResponseModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
     parser_classes = (MultiPartParser, FormParser)
@@ -160,6 +152,51 @@ class DocumentViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         """Assign permissions based on request method"""
         if self.request.method == "GET":
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]
+        return [permission() for permission in permission_classes]
+
+
+class PropertyImageViewSet(CustomResponseModelViewSet):
+    queryset = PropertyImage.objects.all()
+    serializer_class = PropertyImageSerializer
+    def get_permission(self):
+        "Assign permission based on request method"
+        if self.action in ["list", "retrieve"]:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]
+        return [permission() for permission in permission_classes]
+    def create(self , request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            images = serializer.validated_data.get('images')
+            property_id = serializer.validated_data.get("property")
+            created_images = []
+            for image_file in images:
+                property_image = PropertyImage.objects.create(property=property_id, image=image_file)
+                created_images.append(property_image)
+            response_serializer = self.get_serializer(created_images, many=True)
+            return self.custom_response(data=response_serializer.data, status=status.HTTP_201_CREATED)
+        return self.custom_response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class PropertyVideoViewSet(CustomResponseModelViewSet):
+    queryset = PropertyVideo.objects.all()
+    serializer_class = PropertyVideoSerializer
+    def get_permission(self):
+        "Assign permission based on request method"
+        if self.action in ["list", "retrieve"]:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]
+        return [permission() for permission in permission_classes]
+class PropertyLocationViewSet(CustomResponseModelViewSet):
+    queryset = PropertyLocation.objects.all()
+    serializer_class =  PropertyLocationSerializer
+    def get_permission(self):
+        "Assign permission based on request method"
+        if self.action in ["list", "retrieve"]:
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated, IsAgent, HasActiveSubscription]

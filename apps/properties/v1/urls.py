@@ -3,40 +3,17 @@ from django.conf.urls.static import static
 from django.urls import include, path
 from rest_framework_nested import routers
 
-from .views import DocumentViewSet, PropertyViewSet
+from .views import DocumentViewSet, PropertyViewSet, PropertyImageViewSet, PropertyVideoViewSet, PropertyLocationViewSet
 
 router = routers.SimpleRouter()
 router.register("property", PropertyViewSet, basename="property")
 router.register("documents", DocumentViewSet, basename="document")
-urlpatterns = [
-    path(
-        "properties/affordable/",
-        PropertyViewSet.as_view({"get": "list"}),
-        {"price_max": 50000},
-    ),
-    path(
-        "properties/luxury/",
-        PropertyViewSet.as_view({"get": "list"}),
-        {"price_min": 500000},
-    ),
-    path(
-        "properties/rentals/",
-        PropertyViewSet.as_view({"get": "list"}),
-        {"for_rent": True},
-    ),
-    path(
-        "properties/for-sale/",
-        PropertyViewSet.as_view({"get": "list"}),
-        {"for_sale": True},
-    ),
+router.register("property-location", PropertyLocationViewSet, basename="location")
+router.register("property-image", PropertyImageViewSet, basename="image")
+router.register("property-video", PropertyVideoViewSet, basename="video")
+urlpatterns = [   
     path("", include(router.urls)),
-    path(
-        "properties/commercial/",
-        PropertyViewSet.as_view({"get": "list"}),
-        {"property_type": "commercial"},
-    ),
 ]
-
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

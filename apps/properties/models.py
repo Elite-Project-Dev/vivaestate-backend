@@ -25,6 +25,8 @@ class Document(Audit):
         return f"{self.document_type} for {self.property.title}"
 
 
+
+
 class Property(Audit):
     assigned_agent = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -37,28 +39,12 @@ class Property(Audit):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     property_type = models.CharField(max_length=50, choices=PROPERTY_TYPES)
     description = models.TextField(blank=True, null=True)
-    latitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(-90.0), MaxValueValidator(90.0)],
-    )
-    longitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(-180.0), MaxValueValidator(180.0)],
-    )
     bedrooms = models.IntegerField(blank=True, null=True)
     bathrooms = models.IntegerField(blank=True, null=True)
     square_feet = models.IntegerField(blank=True, null=True)
     status = models.CharField(
         max_length=50, choices=PROPERTY_STATUS_CHOICES, default="available"
     )
-    image = models.ImageField(upload_to="property_images/", blank=True, null=True)
-    video = models.FileField(upload_to="property_videos/", blank=True, null=True)
     for_sale = models.BooleanField(default=False)
     for_rent = models.BooleanField(default=False)
 
@@ -76,3 +62,34 @@ class Property(Audit):
 
     def get_absolute_url(self):
         return reverse("property-detail", kwargs={"pk": self.pk})
+
+
+class PropertyImage(models.Model):
+    property = models.ForeignKey(Property, related_name='property_image', on_delete=models.CASCADE )
+    image = models.ImageField(upload_to="property_images/", blank=True, null=True)
+
+    def __str__(self):
+        return f"Image for{self.property.title}"
+    
+class PropertyVideo(models.Model):
+    property = models.ForeignKey(Property, related_name='property_video', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="property_videos/", blank=True, null=True)
+    def __str__(self):
+        return f"Video for{self.property.title}"
+    
+class PropertyLocation(models.Model):
+    property = models.ForeignKey(Property, related_name='property_location', on_delete=models.CASCADE)
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(-90.0), MaxValueValidator(90.0)],
+    )
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(-180.0), MaxValueValidator(180.0)],
+    )
