@@ -9,29 +9,44 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.crypto import get_random_string
 from django.utils.http import urlsafe_base64_encode
+from django.core.validators import validate_email
+from django.template import TemplateDoesNotExist
+from smtplib import SMTPException
 
 logger = logging.getLogger(__name__)
 
-
 def send_email_task(subject, recipient_email, template_name, context):
-    html_message = render_to_string(template_name, context)
-    email = EmailMessage(
-        subject=subject,
-        body=html_message,
-        to=[recipient_email],
-        from_email=context["from_email"],
-    )
-    email.content_subtype = "html"
-    email.send()
-
+    try:
+        html_message = render_to_string(template_name, context)
+        email = EmailMessage(
+            subject=subject,
+            body=html_message,
+            to=[recipient_email],
+            from_email=context["from_email"],
+        )
+        email.content_subtype = "html"
+        email.send()
+    except TemplateDoesNotExist as e:
+        logger.error(f"Template not found: {template_name} — {str(e)}", exc_info=True)
+        raise
+    except SMTPException as e:
+        logger.error(f"SMTP error sending email: {template_name} — {str(e)}", exc_info=True)
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error sending email: {template_name} — {str(e)}", exc_info=True)
+        raise
 
 class EmailService:
     def __init__(self, default_sender=None):
         self.default_sender = default_sender or settings.DEFAULT_FROM_EMAIL
 
     def send_email(self, subject, recipient_email, template_name, context):
+        validate_email(recipient_email)
+        if not subject or not template_name:
+            raise ValueError("Subject and template name are required")
         context["from_email"] = self.default_sender
         send_email_task(subject, recipient_email, template_name, context)
+            
 
     def send_signup_verification_email(self, request, user_data):
         first_name = str(user_data["first_name"]).capitalize()
@@ -96,7 +111,7 @@ class EmailService:
             "assigned_agent": assigned_agent.first_name,
             "interested_buyer": user.first_name,
             "property_link": property_link,
-            "intrested_buyer_whatsapp_no": (
+            "interested_buyer_whatsapp_no": (
                 user.whatsapp_number if user.whatsapp_number else ""
             ),
         }
@@ -153,10 +168,10 @@ class EmailService:
         )
         property_link = request.build_absolute_uri(property_obj.get_absolute_url())
         context = {
-            "insterest_buyer": user.first_name,
+            "insterested_buyer": user.first_name,
             "property_link": property_link,
             "buyer_message": message,
-            "intrested_buyer_whatsapp_no": (
+            "interested_buyer_whatsapp_no": (
                 user.whatsapp_number if user.whatsapp_number else ""
             ),
         }
@@ -167,7 +182,7 @@ class EmailService:
             context=context,
         )
 
-    def comfirmation_of_sent_lead(self, request, property_id):
+    def confirmation_of_sent_lead(self, request, property_id):
         """Notify customer about the sent lead to assigned agent"""
         user = request.user
         from apps.properties.models import Property
